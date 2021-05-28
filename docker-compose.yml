@@ -1,0 +1,30 @@
+version: "3.8"
+
+volumes:
+  postgres_data: { }
+
+services:
+  fastapi:
+    container_name: cmp-api
+    build:
+      context: ./server
+    volumes:
+      - ./server:/app
+    ports:
+      - 8001:8001
+    env_file:
+      - ./secret/env.dev
+    depends_on:
+      - postgres
+    stdin_open: true
+    tty: true
+
+  postgres:
+    container_name: cmp-db
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=cmp
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres

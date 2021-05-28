@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "check-my-plants"
+version = "0.1.0"
+description = ""
+authors = ["tobiwankenobii <tobiv1337@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.65.1"
+uvicorn = "^0.13.4"
+SQLAlchemy = "^1.4.16"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
