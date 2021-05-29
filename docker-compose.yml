@@ -1,7 +1,7 @@
 version: "3.8"
 
-volumes:
-  postgres_data: { }
+#volumes:
+#  postgres_data: { }
 
 services:
   fastapi:
@@ -22,8 +22,9 @@ services:
   postgres:
     container_name: cmp-db
     image: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+#    TODO: Restore the volume after development phase
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=cmp
       - POSTGRES_USER=postgres
