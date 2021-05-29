@@ -54,9 +54,7 @@ class JwtTokenService:
         """Checks token validity and raises an exception if it's not valid.
         If payload matches all requirements, User instance is getting returned.
         """
-        user = session.query(User).filter(User.email == decoded_token.email).first()
-        print(user)
-        user = await User.get_or_none(email=decoded_token.dict().get("email"))
+        user = await User.get_by_field("email", decoded_token.email, session)
         if not user:
             raise HTTPException(status_code=401, detail="User from token payload does not exist")
         return user
