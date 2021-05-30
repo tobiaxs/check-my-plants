@@ -16,7 +16,9 @@ class SaveModelMixin:
             session.add(self)
             return await session.commit()
         except SQLAlchemyError as ex:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=repr(ex))
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=repr(ex)
+            )
 
 
 class DeleteModelMixin:
@@ -28,14 +30,18 @@ class DeleteModelMixin:
             await session.delete(self)
             await session.commit()
         except SQLAlchemyError as ex:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=repr(ex))
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=repr(ex)
+            )
 
 
 class RetrieveModelMixin:
     """Mixin for get functionality."""
 
     @classmethod
-    async def get_by_field(cls, field: str, value: Any, session: AsyncSession) -> "RetrieveModelMixin":
+    async def get_by_field(
+        cls, field: str, value: Any, session: AsyncSession
+    ) -> "RetrieveModelMixin":
         """Creates the query for specific class based on field and value,
         searches for the object and returns the result.
         """
