@@ -1,2 +1,2 @@
-from .plants import Plant
-from .users import User
+from .plants import Plant  # noqa
+from .users import User  # noqa

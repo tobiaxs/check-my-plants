@@ -9,7 +9,9 @@ router = APIRouter()
 
 
 @router.post("/register", status_code=201, response_model=JwtTokenEncoded)
-async def register(payload: UserCreate, session: AsyncSession = Depends(get_db)) -> JwtTokenEncoded:
+async def register(
+    payload: UserCreate, session: AsyncSession = Depends(get_db)
+) -> JwtTokenEncoded:
     """Creates a User instance and returns a response with access token."""
     token = await create_user(payload, session)
     return token

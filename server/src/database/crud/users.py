@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models.users import User
-from src.schemas.users import UserCreate, JwtTokenEncoded
+from src.schemas.users import JwtTokenEncoded, UserCreate
 from src.services.hashing import HashingService
 from src.services.jwt_token import JwtTokenService
 
@@ -16,7 +16,7 @@ async def create_user(payload: UserCreate, session: AsyncSession) -> JwtTokenEnc
         )
     user = User(
         email=payload.email,
-        hashed_password=HashingService.get_hashed_password(payload.password)
+        hashed_password=HashingService.get_hashed_password(payload.password),
     )
     await user.save(session)
     token = JwtTokenService.encode_jwt(user.email)

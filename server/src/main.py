@@ -32,7 +32,7 @@ def create_application() -> FastAPI:
     application = FastAPI(
         title="Check My Plants",
         version=settings.VERSION,
-        description="Simple application for cataloging and viewing home plants made using FastAPI.",
+        description=settings.DESCRIPTION,
     )
     configure_static(application)
     include_routers(application)

@@ -1,0 +1,64 @@
+name: Github Actions
+
+on: [ push ]
+
+defaults:
+  run:
+    working-directory: ./server
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-20.04
+    env:
+      VERSION: 0.0.1
+      ENVIRONMENT: develop
+      SECRET: super_secret_key
+      ALGORITHM: HS256
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/cmp
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: cmp
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.1.1
+        with:
+          virtualenvs-in-project: false
+          virtualenvs-path: ~/.virtualenvs
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ~/.virtualenvs
+          key: poetry-$
+          restore-keys: |
+            poetry-$
+
+      - name: Install Dependencies
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Run flake8
+        run: poetry run flake8 src
+
+      - name: Run black
+        run: poetry run black src --check
+
+      - name: Run isort
+        run: poetry run isort src --check-only
+
+#      TODO: Bring back testing setup
+#      - name: Test with pytest
+#        run: poetry run pytest src --cov="." --cov-fail-under=99
