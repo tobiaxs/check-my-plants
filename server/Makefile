@@ -6,4 +6,4 @@ test:
 .PHONY: lint
 ## Run black, isort and flake
 lint:
-	black . && isort . && flake8 .
+	black src && isort src && flake8 src
