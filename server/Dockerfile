@@ -13,7 +13,7 @@ ENV PATH="$POETRY_HOME/bin:$PATH"
 
 # Install necessary soft
 RUN apt-get update \
-  && apt-get install -y netcat curl postgresql make \
+  && apt-get install -y netcat curl make gcc postgresql python3-dev libpq-dev \
   && apt-get clean
 
 # Install poetry
