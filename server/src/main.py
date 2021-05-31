@@ -27,6 +27,8 @@ def create_application() -> FastAPI:
         version=settings.VERSION,
         description=settings.DESCRIPTION,
     )
+    include_routers(application)
+    configure_static(application)
     return application
 
 
@@ -36,9 +38,7 @@ app = create_application()
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting up...")
-    include_routers(app)
     init_database(app)
-    configure_static(app)
 
 
 @app.on_event("shutdown")

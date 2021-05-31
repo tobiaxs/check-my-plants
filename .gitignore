@@ -1,5 +1,6 @@
-/venv
 /.idea
+/venv
+/server/htmlcov
 
 .env
 .coverage

@@ -14,4 +14,6 @@ class Plant(GenericModel):
     is_accepted = fields.BooleanField(default=False)
 
     """Relational fields."""
-    creator = fields.ForeignKeyField("models.User", related_name="plants", on_delete=fields.CASCADE)
+    creator = fields.ForeignKeyField(
+        "models.User", related_name="plants", on_delete=fields.CASCADE
+    )

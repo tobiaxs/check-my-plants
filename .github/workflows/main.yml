@@ -51,14 +51,14 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Run flake8
-        run: poetry run flake8 src
+        run: poetry run flake8 .
 
       - name: Run black
-        run: poetry run black src --check
+        run: poetry run black . --check
 
       - name: Run isort
-        run: poetry run isort src --check-only
+        run: poetry run isort . --check-only
 
-#      TODO: Bring back testing setup
-#      - name: Test with pytest
-#        run: poetry run pytest src --cov="." --cov-fail-under=99
+      # TODO: Increase the coverage
+      - name: Test with pytest
+        run: poetry run pytest . --cov="." --cov-fail-under=88

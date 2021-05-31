@@ -48,9 +48,7 @@ class JwtTokenService:
         return refreshed_token
 
     @staticmethod
-    async def get_user_from_token(
-        decoded_token: JwtTokenDecoded
-    ) -> User:
+    async def get_user_from_token(decoded_token: JwtTokenDecoded) -> User:
         """Checks token validity and raises an exception if it's not valid.
         If payload matches all requirements, User instance is getting returned.
         """

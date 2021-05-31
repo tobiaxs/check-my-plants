@@ -1,4 +1,4 @@
-from typing import Generator
+from collections import Generator
 
 import nest_asyncio
 import pytest
@@ -12,7 +12,7 @@ from src.settings import settings
 
 @pytest.fixture
 async def client() -> Generator[AsyncClient]:
-    """Async client with test db connection."""
+    """Async client with test database connection."""
     nest_asyncio.apply()
     initializer(modules=settings.APP_MODELS)
     app = create_application()
