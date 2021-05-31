@@ -11,7 +11,7 @@ jobs:
     name: Continuous Integration
     runs-on: ubuntu-20.04
     env:
-      PYTHONPATH: ${{ $GITHUB_WORKSPACE }}/server
+      PYTHONPATH: /home/runner/work/check-my-plants/check-my-plants/server
       VERSION: 0.0.1
       ENVIRONMENT: develop
       SECRET: super_secret_key
