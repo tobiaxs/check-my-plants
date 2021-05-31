@@ -5,6 +5,7 @@ WORKDIR /app
 # Set env variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONPATH="/app" \
     POETRY_HOME="/opt/poetry" \
     POETRY_NO_INTERACTION=1
 

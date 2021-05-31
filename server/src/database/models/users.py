@@ -1,18 +1,11 @@
-from sqlalchemy import Boolean, Column, String
-from sqlalchemy.orm import relationship
-from sqlalchemy_utils import EmailType
+from tortoise import fields
 
-from src.database.base_class import Base
+from src.database.models.generic import GenericModel
 
 
-class User(Base):
-    """Class for storing users data."""
+class User(GenericModel):
+    """Model for storing users data."""
 
-    __tablename__ = "users"
-
-    email = Column(EmailType, nullable=False, unique=True)
-    hashed_password = Column(String, nullable=False)
-    is_superuser = Column(Boolean, default=False)
-
-    """Relation fields."""
-    plants = relationship("Plant", back_populates="creator")
+    email = fields.CharField(max_length=127, unique=True)
+    hashed_password = fields.CharField(max_length=127)
+    is_superuser = fields.BooleanField(default=False)
