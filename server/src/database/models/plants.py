@@ -1,22 +1,17 @@
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from tortoise import fields
 
-from src.database.base_class import Base
 from src.database.models.enums import Conditions
+from src.database.models.generic import GenericModel
 
 
-class Plant(Base):
-    """Class for storing plants data."""
+class Plant(GenericModel):
+    """Model for storing plants data."""
 
-    __tablename__ = "plants"
+    name = fields.CharField(max_length=63)
+    description = fields.TextField()
+    temperature = fields.CharEnumField(Conditions)
+    humidity = fields.CharEnumField(Conditions)
+    is_accepted = fields.BooleanField(default=False)
 
-    name = Column(String(63), nullable=False)
-    description = Column(String, nullable=False)
-    temperature = Column(Enum(Conditions), nullable=False)
-    humidity = Column(Enum(Conditions), nullable=False)
-    is_accepted = Column(Boolean, default=True)
-
-    """Relation fields."""
-    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    creator = relationship("User", back_populates="plants")
+    """Relational fields."""
+    creator = fields.ForeignKeyField("models.User", related_name="plants", on_delete=fields.CASCADE)

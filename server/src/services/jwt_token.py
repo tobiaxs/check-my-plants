@@ -2,12 +2,10 @@ import os
 import time
 from typing import Optional
 
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 from jose import JWTError, jwt
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import User
-from src.database.session import get_db
 from src.schemas.users import JwtTokenDecoded, JwtTokenEncoded
 
 JWT_SECRET = os.getenv("SECRET")
@@ -51,12 +49,12 @@ class JwtTokenService:
 
     @staticmethod
     async def get_user_from_token(
-        decoded_token: JwtTokenDecoded, session: AsyncSession = Depends(get_db)
+        decoded_token: JwtTokenDecoded
     ) -> User:
         """Checks token validity and raises an exception if it's not valid.
         If payload matches all requirements, User instance is getting returned.
         """
-        user = await User.get_by_field("email", decoded_token.email, session)
+        user = await User.get_or_none(email=decoded_token.email)
         if not user:
             raise HTTPException(
                 status_code=401, detail="User from token payload does not exist"

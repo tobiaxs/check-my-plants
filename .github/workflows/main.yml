@@ -15,7 +15,7 @@ jobs:
       ENVIRONMENT: develop
       SECRET: super_secret_key
       ALGORITHM: HS256
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/cmp
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/cmp
     services:
       postgres:
         image: postgres

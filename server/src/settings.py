@@ -4,6 +4,7 @@ import os
 class Settings:
     """Class containing application settings."""
 
+    TITLE: str = "Check My Plants"
     VERSION: str = os.getenv("VERSION")
     DESCRIPTION: str = (
         "Simple application for cataloging and viewing home plants made using FastAPI."

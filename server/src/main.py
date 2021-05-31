@@ -4,8 +4,7 @@ from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
 from src.api.v1.users import router as users_router
-from src.database.base_class import Base
-from src.database.session import engine
+from src.database.config import init_database
 from src.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -21,21 +20,13 @@ def configure_static(application: FastAPI):
     application.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-async def create_tables():
-    """Prepares the SQLAlchemy engine."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
 def create_application() -> FastAPI:
     """Initializes the FastAPI application."""
     application = FastAPI(
-        title="Check My Plants",
+        title=settings.TITLE,
         version=settings.VERSION,
         description=settings.DESCRIPTION,
     )
-    configure_static(application)
-    include_routers(application)
     return application
 
 
@@ -45,7 +36,9 @@ app = create_application()
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting up...")
-    await create_tables()
+    include_routers(app)
+    init_database(app)
+    configure_static(app)
 
 
 @app.on_event("shutdown")

@@ -8,14 +8,12 @@ authors = ["tobiwankenobii <tobiv1337@gmail.com>"]
 python = "^3.9"
 fastapi = "^0.65.1"
 uvicorn = "^0.13.4"
-SQLAlchemy = "^1.4.16"
-SQLAlchemy-Utils = "^0.37.4"
 pydantic = {extras = ["email"], version = "^1.8.2"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-aiofiles = "^0.7.0"
-asyncpg = "^0.23.0"
-psycopg2 = "^2.8.6"
 python-jose = {extras = ["cryptography"], version = "^3.2.0"}
+httpx = "^0.18.1"
+tortoise-orm = {extras = ["asyncpg"], version = "^0.17.3"}
+aiofiles = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -24,6 +22,8 @@ isort = "^5.8.0"
 flake8 = "^3.9.2"
 pytest-asyncio = "^0.15.1"
 pytest-cov = "^2.12.0"
+asgi-lifespan = "^1.0.1"
+nest-asyncio = "^1.5.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
