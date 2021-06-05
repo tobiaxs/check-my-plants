@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
+from src.api.v1.plants import router as plants_router
 from src.api.v1.users import router as users_router
 from src.database.config import init_database
 from src.settings import settings
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 def include_routers(application: FastAPI):
     """Adds the routers."""
     application.include_router(users_router, prefix="/users", tags=["users"])
+    application.include_router(plants_router, prefix="/plants", tags=["plants"])
 
 
 def configure_static(application: FastAPI):
