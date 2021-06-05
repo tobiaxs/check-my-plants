@@ -1,7 +1,7 @@
 import enum
 
 
-class Conditions(enum.Enum):
+class Conditions(str, enum.Enum):
     """Enum for defining conditions type."""
 
     low = "low"

@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from jose import JWTError, jwt
 
 from src.database.models import User
-from src.schemas.users import JwtTokenDecoded, JwtTokenEncoded
+from src.schemas.jwt_token import JwtTokenDecoded, JwtTokenEncoded
 
 JWT_SECRET = os.getenv("SECRET")
 JWT_ALGORITHM = os.getenv("ALGORITHM")

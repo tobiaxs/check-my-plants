@@ -6,7 +6,9 @@ from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
 from tortoise.contrib.test import finalizer, initializer
 
+from src.database.models import User
 from src.main import create_application
+from src.services.jwt_token import JwtTokenService
 from src.settings import settings
 
 
@@ -21,3 +23,14 @@ async def client() -> Generator[AsyncClient]:
     ) as test_client, LifespanManager(app):
         yield test_client
     finalizer()
+
+
+@pytest.fixture
+async def auth_client(client: AsyncClient) -> Generator[AsyncClient]:
+    """Authenticated async client."""
+    user = await User.create(
+        email="pytest@auth.com", hashed_password="pytest-auth-user"
+    )
+    token = JwtTokenService.encode_jwt(user.email)
+    client.headers["Authorization"] = f"Bearer {token.access_token}"
+    yield client
