@@ -49,7 +49,7 @@ async def check_creator(
 
 async def test_create_plant(auth_client: AsyncClient):
     """Tests plant creation using correct payload."""
-    response = await auth_client.post("/plants", data=json.dumps(PLANT_PAYLOAD))
+    response = await auth_client.post("/api/plants", data=json.dumps(PLANT_PAYLOAD))
     data = response.json()
 
     assert response.status_code == 201
@@ -65,7 +65,7 @@ async def test_create_plant_wrong_enum(auth_client: AsyncClient):
     payload["temperature"] = "wrong temperature"
     payload["humidity"] = "wrong humidity"
 
-    response = await auth_client.post("/plants", data=json.dumps(payload))
+    response = await auth_client.post("/api/plants", data=json.dumps(payload))
     data = response.json()
 
     assert response.status_code == 422
@@ -77,7 +77,7 @@ async def test_create_plant_wrong_enum(auth_client: AsyncClient):
 
 async def test_create_plant_no_user(client: AsyncClient):
     """Tests plant creation with no user token in the payload."""
-    response = await client.post("/plants", data=json.dumps(PLANT_PAYLOAD))
+    response = await client.post("/api/plants", data=json.dumps(PLANT_PAYLOAD))
 
     assert response.status_code == 403
     assert await Plant.all().count() == 0
@@ -92,7 +92,7 @@ async def test_plants_list(client: AsyncClient):
         await Plant.create(**PLANT_PAYLOAD, creator=user, is_accepted=True)
         for _ in range(3)
     ]
-    response = await client.get("/plants")
+    response = await client.get("/api/plants")
     data = response.json()
 
     assert response.status_code == 200
@@ -107,7 +107,7 @@ async def test_plant_retrieve(client: AsyncClient):
         email="some@creator.com", hashed_password="created-password"
     )
     plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
-    response = await client.get(f"/plants/{plant.uuid}")
+    response = await client.get(f"/api/plants/{plant.uuid}")
     data = response.json()
 
     assert response.status_code == 200
@@ -116,7 +116,7 @@ async def test_plant_retrieve(client: AsyncClient):
 
 async def test_plant_retrieve_wrong_pk(client: AsyncClient):
     """Tests retrieving not existing plant."""
-    response = await client.get(f"/plants/{uuid.uuid4()}")
+    response = await client.get(f"/api/plants/{uuid.uuid4()}")
     assert response.status_code == 404
 
 
@@ -124,7 +124,7 @@ async def test_plant_delete(auth_client: AsyncClient):
     """Tests deleting plant."""
     user = await User.get(email="pytest@auth.com")
     plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
-    response = await auth_client.delete(f"/plants/{plant.uuid}")
+    response = await auth_client.delete(f"/api/plants/{plant.uuid}")
 
     assert response.status_code == 200
     assert await Plant.all().count() == 0
@@ -132,7 +132,7 @@ async def test_plant_delete(auth_client: AsyncClient):
 
 async def test_plant_delete_wrong_pk(auth_client: AsyncClient):
     """Tests retrieving not existing plant."""
-    response = await auth_client.delete(f"/plants/{uuid.uuid4()}")
+    response = await auth_client.delete(f"/api/plants/{uuid.uuid4()}")
     assert response.status_code == 404
 
 
@@ -140,7 +140,7 @@ async def test_plant_delete_wrong_user(auth_client: AsyncClient):
     """Tests deleting plant by user that is not creator."""
     user = await User.create(email="plant@creator.com", hashed_password="plant-creator")
     plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
-    response = await auth_client.delete(f"/plants/{plant.uuid}")
+    response = await auth_client.delete(f"/api/plants/{plant.uuid}")
 
     assert response.status_code == 403
     assert await Plant.all().count() == 1
@@ -152,7 +152,7 @@ async def test_plant_delete_wrong_superuser(auth_client: AsyncClient):
     await User.filter(email="pytest@auth.com").update(is_superuser=True)
     user = await User.create(email="plant@creator.com", hashed_password="plant-creator")
     plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
-    response = await auth_client.delete(f"/plants/{plant.uuid}")
+    response = await auth_client.delete(f"/api/plants/{plant.uuid}")
 
     assert response.status_code == 200
     assert await Plant.all().count() == 0
