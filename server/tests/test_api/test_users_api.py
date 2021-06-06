@@ -14,7 +14,7 @@ pytestmark = [pytest.mark.asyncio]
 async def test_create_user(client: AsyncClient):
     """Checks user creation."""
     payload = {"email": "peter.tobias@gmail.com", "password": "mypassword.."}
-    response = await client.post("/users/register", data=json.dumps(payload))
+    response = await client.post("/api/users/register", data=json.dumps(payload))
     data = response.json()
 
     assert response.status_code == 201
@@ -31,7 +31,7 @@ async def test_create_user_with_existing_user(client: AsyncClient):
     }
     post_payload = {"email": "jon.jones@gmail.com", "password": "unhashed but whatever"}
     await User.create(**model_payload)
-    response = await client.post("/users/register", data=json.dumps(post_payload))
+    response = await client.post("/api/users/register", data=json.dumps(post_payload))
 
     assert response.status_code == 400
     assert response.json().get("detail") == "User with this email already exists"
@@ -48,7 +48,7 @@ async def test_login(client: AsyncClient):
     }
     instance = await User.create(**payload)
     payload["password"] = "__blessed..."
-    response = await client.post("/users/login", data=json.dumps(payload))
+    response = await client.post("/api/users/login", data=json.dumps(payload))
     data = response.json()
 
     assert response.status_code == 200
@@ -66,7 +66,7 @@ async def test_login_wrong_credentials(client: AsyncClient):
     }
     await User.create(**payload)
     payload["password"] = "chicken"
-    response = await client.post("/users/login", data=json.dumps(payload))
+    response = await client.post("/api/users/login", data=json.dumps(payload))
     data = response.json()
 
     assert response.status_code == 401
@@ -79,7 +79,7 @@ async def test_login_not_existing_user(client: AsyncClient):
         "email": "george.stpierre@gmail.com",
         "password": "gspgspgsp",
     }
-    response = await client.post("/users/login", data=json.dumps(payload))
+    response = await client.post("/api/users/login", data=json.dumps(payload))
     data = response.json()
 
     assert response.status_code == 401

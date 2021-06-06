@@ -12,7 +12,7 @@ from src.database.crud.plants import (
 from src.database.models import User
 from src.schemas.plants import PlantCreate, PlantModel, PlantQuerySet
 
-router = APIRouter()
+router = APIRouter(prefix="/api/plants", tags=["Plants Api"])
 
 
 @router.post("/", status_code=201, response_model=PlantModel)
