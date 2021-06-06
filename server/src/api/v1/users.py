@@ -4,7 +4,7 @@ from src.database.crud.users import authenticate_user, create_user
 from src.schemas.jwt_token import JwtTokenEncoded
 from src.schemas.users import UserPayload
 
-router = APIRouter()
+router = APIRouter(prefix="/api/users", tags=["Users Api"])
 
 
 @router.post("/register", status_code=201, response_model=JwtTokenEncoded)
