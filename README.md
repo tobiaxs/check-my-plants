@@ -26,8 +26,8 @@ I also plan to get it connected via Kubernetes and deployed on AWS.
 
 ### Getting started
 
-The local setup is made with docker-compose. Example and working `.env` file is in `secrets` folder at it's connected by
-default in compose file.
+The local setup is made with docker-compose. Example and working `.env` file is in `secrets` folder and it's connected
+by default in compose file.
 
 Building the images
 

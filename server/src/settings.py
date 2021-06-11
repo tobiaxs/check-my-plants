@@ -1,7 +1,9 @@
 import os
 
+from pydantic import BaseSettings
 
-class Settings:
+
+class Settings(BaseSettings):
     """Class containing application settings."""
 
     TITLE: str = "Check My Plants"

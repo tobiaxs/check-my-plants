@@ -1,39 +1,41 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
-from fastapi.templating import Jinja2Templates
-from starlette.requests import Request
+from fastapi import APIRouter, Depends
 from starlette.responses import HTMLResponse
 
+from src.api.middleware.context import context_middleware
+from src.api.middleware.response import TemplateResponse
 from src.database.models import Plant
 
 router = APIRouter(tags=["Plants"], include_in_schema=False)
 
-templates = Jinja2Templates("templates")
-
 
 @router.get("/", status_code=200, response_class=HTMLResponse)
-async def plants_dashboard(request: Request) -> templates.TemplateResponse:
+async def plants_dashboard(context: dict = Depends(context_middleware)) -> HTMLResponse:
     """Displays a list of all plants."""
     plants = await Plant.filter(is_accepted=False)
-    context = {"request": request, "plants": plants}
-    return templates.TemplateResponse("plants/dashboard.html", context)
+    context["plants"] = plants
+    return TemplateResponse("plants/dashboard.html", context)
 
 
 @router.get("/plants/{pk}", status_code=200, response_class=HTMLResponse)
-async def plant_details(pk: UUID, request: Request) -> templates.TemplateResponse:
-    """Displays a details of given plant."""
+async def plant_details(
+    pk: UUID, context: dict = Depends(context_middleware)
+) -> HTMLResponse:
+    """Displays a details of given plant if it exists."""
     plant = await Plant.get_or_none(pk=pk)
-    # TODO: Custom 404 page
     if not plant:
-        raise HTTPException(status_code=404, detail="Plant does not exist")
+        return TemplateResponse("shared/404-page.html", context, 404)
     await plant.fetch_related("creator")
-    context = {"request": request, "plant": plant}
-    return templates.TemplateResponse("plants/details.html", context)
+    context["plant"] = plant
+    return TemplateResponse("plants/details.html", context)
 
 
-@router.get("/plant/create", status_code=200, response_class=HTMLResponse)
-async def plant_create_form(request: Request) -> templates.TemplateResponse:
+@router.get("/plant/create", status_code=201, response_class=HTMLResponse)
+async def plant_create_form(
+    context: dict = Depends(context_middleware),
+) -> HTMLResponse:
     """Displays a plant create from."""
-    context = {"request": request}
-    return templates.TemplateResponse("shared/403-page.html", context)
+    if not context.get("user"):
+        return TemplateResponse("shared/403-page.html", context, 403)
+    return TemplateResponse("plants/create.html", context)

@@ -12,8 +12,8 @@
         <p class="card-text">
             {{ plant.description|truncate(64) }}
             <br>
-            <span class="badge bg-info">{{ plant.temperature.value|capitalize }} Temperature</span>
-            <span class="badge bg-info">{{ plant.humidity.value|capitalize }} Humidity</span>
+            <span class="badge bg-success">{{ plant.temperature.value|capitalize }} Temperature</span>
+            <span class="badge bg-success">{{ plant.humidity.value|capitalize }} Humidity</span>
         </p>
 
         <a href="/plants/{{ plant.uuid }}" role="button" class="btn btn-primary">Check this plant</a>

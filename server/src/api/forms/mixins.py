@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from src.database.models.generic import GenericModel
 
@@ -13,7 +13,7 @@ class FormCreateMixin:
         """Optional method for editing data before running create."""
         pass
 
-    async def create(self) -> GenericModel:
+    async def create(self) -> "model":
         """Creates and returns a model instance based on the data."""
         self.clean()
         instance = await self.model.create(**self.data)

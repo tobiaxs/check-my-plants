@@ -1,52 +1,75 @@
-from fastapi import APIRouter, Form
-from fastapi.templating import Jinja2Templates
-from pydantic import EmailStr, SecretStr
-from starlette.requests import Request
-from starlette.responses import HTMLResponse
+from typing import Union
 
-from src.api.forms.users import UserCreateForm
+from fastapi import APIRouter, Depends
+from starlette import status
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, RedirectResponse
+
+from src.api.forms.users import UserCreateForm, UserLoginForm
+from src.api.middleware.context import context_middleware
+from src.api.middleware.response import TemplateResponse
+from src.services.jwt_token import JwtTokenService
 
 router = APIRouter(tags=["Users"], include_in_schema=False)
 
-templates = Jinja2Templates("templates")
-
 
 @router.get("/register", status_code=200, response_class=HTMLResponse)
-async def user_register_form(request: Request) -> templates.TemplateResponse:
-    """Displays a user register form."""
-    # TODO: Redirect to / if user exists
-    context = {"request": request}
-    return templates.TemplateResponse("users/register.html", context)
+async def user_register_form(
+    context: dict = Depends(context_middleware),
+) -> Union[HTMLResponse, RedirectResponse]:
+    """Displays a user register form or redirects to dashboard
+    if user is already logged in.
+    """
+    if context.get("user"):
+        return RedirectResponse("/")
+    return TemplateResponse("users/register.html", context)
 
 
 @router.get("/login", status_code=200, response_class=HTMLResponse)
-async def user_login_form(request: Request) -> templates.TemplateResponse:
-    """Displays a user login form."""
-    # TODO: Redirect to / if user exists
-    context = {"request": request}
-    return templates.TemplateResponse("users/login.html", context)
+async def user_login_form(
+    context: dict = Depends(context_middleware),
+) -> Union[HTMLResponse, RedirectResponse]:
+    """Displays a user login form or redirects to dashboard
+    if user is already logged in.
+    """
+    if context.get("user"):
+        return RedirectResponse("/")
+    return TemplateResponse("users/login.html", context)
 
 
-@router.post("/register", status_code=200, response_class=HTMLResponse)
+@router.post("/register", status_code=201, response_class=HTMLResponse)
 async def user_register(
-    request: Request,
-    email: EmailStr = Form(...),
-    password: SecretStr = Form(..., min_length=8, max_length=127),
-    password_confirm: SecretStr = Form(...),
-) -> templates.TemplateResponse:
-    """Registers a user using form data."""
-    form = UserCreateForm(
-        {
-            "email": email,
-            "password": password.get_secret_value(),
-            "password_confirm": password_confirm.get_secret_value(),
-        }
-    )
+    request: Request, form: UserCreateForm = Depends()
+) -> HTMLResponse:
+    """Registers a user using form data and redirects to login form."""
     await form.validate()
     if form.errors:
         context = {"request": request, "errors": form.errors}
-        return templates.TemplateResponse("users/register.html", context)
+        return TemplateResponse("users/register.html", context, 422)
     else:
         await form.create()
         context = {"request": request, "messages": ["You can now login into our app"]}
-        return templates.TemplateResponse("users/login.html", context)
+        return TemplateResponse("users/login.html", context, 201)
+
+
+@router.post("/login", status_code=200, response_class=HTMLResponse)
+async def user_login(
+    request: Request, form: UserLoginForm = Depends()
+) -> Union[HTMLResponse, RedirectResponse]:
+    """Logs user in, saves the cookies and redirects to the dashboard"""
+    await form.validate()
+    if form.errors:
+        context = {"request": request, "errors": form.errors}
+        return TemplateResponse("users/login.html", context)
+    token = JwtTokenService.encode_jwt(form.user.email)
+    response = RedirectResponse("/", status.HTTP_302_FOUND)
+    response.set_cookie("access_token", f"Bearer {token.access_token}")
+    return response
+
+
+@router.get("/logout", status_code=200, response_class=RedirectResponse)
+async def user_logout() -> RedirectResponse:
+    """Clears the cookies and redirects to the dashboard."""
+    response = RedirectResponse("/")
+    response.delete_cookie("access_token")
+    return response

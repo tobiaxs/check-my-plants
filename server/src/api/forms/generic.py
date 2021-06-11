@@ -7,10 +7,12 @@ from src.api.forms.mixins import FormCreateMixin
 class GenericForm(ABC):
     """Generic form class with init logic and abstract validate method."""
 
-    def __init__(self, data: Dict[str, Any]):
-        """Initializes errors as empty list and saves the data."""
+    def __init__(self, *args, **kwargs):
+        """Initializes errors as an empty list.
+        Inheritors should assign the form values to data.
+        """
         self.errors = []
-        self.data = data
+        self.data: Dict[str, Any]
 
     @abstractmethod
     def validate(self) -> None:
