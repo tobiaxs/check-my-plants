@@ -1,47 +1,5 @@
 {% extends "shared/base.html" %}
 
 {% block content %}
-    <p>{{ user.email }}</p>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                <div class="card border shadow-5">
-                    <div class="card-body p-5 text-center">
-                        <div class="pb-5">
-                            <h1 class="fw-bold mb-0">Welcome</h1>
-                            <i class="fas fa-leaf fa-3x my-4"></i>
-
-                            {% include "components/error-handler.html" %}
-
-                            <form action="/register" method="POST">
-                                <div class="form-outline mb-4 border-bottom">
-                                    <input type="email" name="email" id="form1Example1"
-                                           value="{{ email }}" class="form-control" required/>
-                                    <label class="form-label" for="form1Example1">Email address</label>
-                                </div>
-                                <div class="form-outline mb-4 border-bottom">
-                                    <input type="password" name="password" id="form2Example2" class="form-control"
-                                           required/>
-                                    <label class="form-label" for="form2Example2">Password</label>
-                                </div>
-                                <div class="form-outline mb-5 border-bottom">
-                                    <input type="password" name="password_confirm" id="form2Example2"
-                                           class="form-control" required/>
-                                    <label class="form-label" for="form2Example2">Confirm password</label>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-block">Sign up</button>
-                            </form>
-                        </div>
-                        <div>
-                            <p class="mb-0">
-                                Already have an account?
-                                <a href="/login" class="text-body fw-bold">Log In</a>
-                            </p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include "forms/register.html" %}
 {% endblock %}

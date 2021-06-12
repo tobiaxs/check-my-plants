@@ -1,0 +1,22 @@
+<div class="card text-center shadow-5" style="width: 18rem;">
+    <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+        <img src="https://mdbcdn.b-cdn.net/img/new/standard/nature/111.jpg" class="img-fluid"/>
+        <a href="/plants/{{ plant.uuid }}/">
+            <div class="mask" style="background-color: rgba(251, 251, 251, 0.15)"></div>
+        </a>
+    </div>
+
+    <div class="card-body">
+        <h5 class="card-title">{{ plant.name }}</h5>
+
+        <p class="card-text">
+            {{ plant.description|truncate(64) }}
+            <br>
+            <span class="badge bg-success">{{ plant.temperature.value|capitalize }} Temperature</span>
+            <span class="badge bg-success">{{ plant.humidity.value|capitalize }} Humidity</span>
+        </p>
+
+        <a href="/plants/{{ plant.uuid }}" role="button" class="btn btn-primary">Check this plant</a>
+    </div>
+    <div class="card-footer">{{ plant.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+</div>

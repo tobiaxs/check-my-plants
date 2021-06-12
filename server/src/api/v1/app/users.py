@@ -1,7 +1,6 @@
 from typing import Union
 
 from fastapi import APIRouter, Depends
-from starlette import status
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, RedirectResponse
 
@@ -46,10 +45,9 @@ async def user_register(
     if form.errors:
         context = {"request": request, "errors": form.errors}
         return TemplateResponse("users/register.html", context, 422)
-    else:
-        await form.create()
-        context = {"request": request, "messages": ["You can now login into our app"]}
-        return TemplateResponse("users/login.html", context, 201)
+    await form.create()
+    context = {"request": request, "messages": ["You can now login into our app"]}
+    return TemplateResponse("users/login.html", context, 201)
 
 
 @router.post("/login", status_code=200, response_class=HTMLResponse)
@@ -61,8 +59,8 @@ async def user_login(
     if form.errors:
         context = {"request": request, "errors": form.errors}
         return TemplateResponse("users/login.html", context)
-    token = JwtTokenService.encode_jwt(form.user.email)
-    response = RedirectResponse("/", status.HTTP_302_FOUND)
+    token = JwtTokenService.encode_jwt(form.data["email"])
+    response = RedirectResponse("/", 302)
     response.set_cookie("access_token", f"Bearer {token.access_token}")
     return response
 
