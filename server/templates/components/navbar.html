@@ -1,8 +1,8 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container">
         <a class="navbar-brand me-2" href="/">
             <img
-                    src="static/favicon.ico"
+                    src="/static/favicon.ico"
                     height="32"
                     alt="Check My Plants"
                     loading="lazy"
@@ -28,24 +28,41 @@
                     <a class="nav-link" href="/">Dashboard</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/plant/create">Add Your Plant</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/docs">Docs</a>
                 </li>
             </ul>
 
             <div class="d-flex align-items-center">
-                <a href="/login" role="button" class="btn btn-link px-3 me-2">
-                    Login
-                </a>
-                <a href="/register" role="button" class="btn btn-primary me-3">
-                    Sign up for free
-                </a>
-                <a
-                        class="btn btn-success px-3"
-                        href="/profile"
-                        role="button"
-                >
-                    <i class="far fa-user-circle"></i>
-                </a>
+                {% if user %}
+                    {% if user.is_superuser %}
+                        <a href="/admin" role="button" class="btn btn-primary px-3 me-2">
+                            Admin
+                        </a>
+                    {% endif %}
+
+                    <a
+                            class="btn btn-success px-3 me-2"
+                            href="/profile"
+                            role="button"
+                    >
+                        <i class="far fa-user-circle"></i>
+                    </a>
+
+                    <a href="/logout" role="button" class="btn btn-link px-3">
+                        Logout
+                    </a>
+                {% else %}
+                    <a href="/login" role="button" class="btn btn-link px-3 me-2">
+                        Login
+                    </a>
+
+                    <a href="/register" role="button" class="btn btn-primary me-3">
+                        Sign up for free
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>

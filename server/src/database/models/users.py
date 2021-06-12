@@ -9,3 +9,5 @@ class User(GenericModel):
     email = fields.CharField(max_length=127, unique=True)
     hashed_password = fields.CharField(max_length=127)
     is_superuser = fields.BooleanField(default=False)
+
+    # TODO: Nickname, Profile Picture, Is Active

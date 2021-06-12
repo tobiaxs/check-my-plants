@@ -1,0 +1,10 @@
+{% extends "shared/base.html" %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-4">
+            {% set errors = ["You are not permitted to visit this page"] %}
+            {% include "components/error-handler.html" %}
+        </div>
+    </div>
+{% endblock %}

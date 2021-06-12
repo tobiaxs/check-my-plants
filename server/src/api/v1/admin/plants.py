@@ -31,14 +31,14 @@ async def plants_list() -> PlantQuerySet:
     return plants
 
 
-@router.get("/{pk}/", status_code=200, response_model=PlantModel)
+@router.get("/{pk}", status_code=200, response_model=PlantModel)
 async def plant_retrieve(pk: UUID) -> PlantModel:
     """Retrieves a specific plant by it's pk."""
     plant = await get_plant(pk)
     return plant
 
 
-@router.delete("/{pk}/", status_code=200, response_model=bool)
+@router.delete("/{pk}", status_code=200, response_model=bool)
 async def plant_delete(pk: UUID, user: User = Depends(user_middleware)) -> bool:
     """Deletes a specific plant by it's pk."""
     deleted = await delete_plant(pk, user)

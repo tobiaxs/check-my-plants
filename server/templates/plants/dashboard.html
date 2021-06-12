@@ -1,5 +1,11 @@
 {% extends "shared/base.html" %}
 
 {% block content %}
-    <p>Dashboard template</p>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for plant in plants %}
+            <div class="col">
+                {% include "plants/card.html" %}
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

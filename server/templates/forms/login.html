@@ -1,0 +1,28 @@
+{% extends "components/card.html" %}
+
+{% block card_content %}
+    <h1 class="fw-bold mb-0">Welcome</h1>
+    <i class="fas fa-leaf fa-3x my-4"></i>
+
+    {% include "components/message-handler.html" %}
+    {% include "components/error-handler.html" %}
+
+    <form action="/login" method="POST">
+        <div class="form-outline mb-4">
+            <input name="email" type="email" id="form1Example1" class="form-control"/>
+            <label class="form-label" for="form1Example1">Email address</label>
+        </div>
+        <div class="form-outline mb-4">
+            <input name="password" type="password" id="form2Example2" class="form-control"/>
+            <label class="form-label" for="form2Example2">Password</label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+    </form>
+    </div>
+    <div>
+        <p class="mb-0">
+            Don't have an account?
+            <a href="/register" class="text-body fw-bold">Sign Up</a>
+        </p>
+    </div>
+{% endblock %}

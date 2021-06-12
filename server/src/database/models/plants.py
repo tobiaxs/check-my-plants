@@ -17,3 +17,5 @@ class Plant(GenericModel):
     creator = fields.ForeignKeyField(
         "models.User", related_name="plants", on_delete=fields.CASCADE
     )
+
+    # TODO: Category, Image, Rating, Difficulty

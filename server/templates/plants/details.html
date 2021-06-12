@@ -1,0 +1,37 @@
+{% extends "shared/base.html" %}
+
+{% block content %}
+    <div class="card">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img
+                        src="https://mdbootstrap.com/wp-content/uploads/2020/06/vertical.jpg"
+                        alt="..."
+                        class="img-fluid"
+                />
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ plant.name }}</h5>
+                    <p>
+                        <span class="badge rounded-pill bg-success">{{ plant.temperature.value|capitalize }} Temperature</span>
+                        <span class="badge rounded-pill bg-success">{{ plant.humidity.value|capitalize }} Humidity</span>
+                    </p>
+                    <p class="card-text">
+                        {{ plant.description }}
+                    </p>
+                    <p class="card-text text-end">
+                        <small class="text-muted">
+                            Created by {{ plant.creator.email }} at {{ plant.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer text-end mt-3">
+                    <div class="mt-3">
+                        <a href="/" role="button" class="btn btn-primary">Go Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

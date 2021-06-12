@@ -1,0 +1,10 @@
+{% extends "shared/base.html" %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-4">
+            {% set errors = ["The page you tried to access does not exist"] %}
+            {% include "components/error-handler.html" %}
+        </div>
+    </div>
+{% endblock %}
