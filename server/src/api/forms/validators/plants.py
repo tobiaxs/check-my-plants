@@ -26,4 +26,4 @@ class ConditionsValidator(GenericValidator):
         if not data["temperature"] in Conditions.__members__:
             self.errors.append("Wrong temperature value")
         if not data["humidity"] in Conditions.__members__:
-            self.errors.append("Wrong temperature value")
+            self.errors.append("Wrong humidity value")
