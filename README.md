@@ -2,7 +2,7 @@
 
 [![python](https://img.shields.io/static/v1?label=python&message=3.9%2B&color=informational&logo=python&logoColor=white)](https://www.python.org/)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
-![Continuous Integration and Delivery](https://github.com/tobiwankenobii/check-my-plants/workflows/Github%20Actions/badge.svg?branch=main)
+![Continuous Integration and Delivery](https://github.com/tobiwankenobii/check-my-plants/workflows/Github%20Actions/badge.svg?branch=develop)
 
 Simple application for cataloging and viewing home plants made using FastAPI framework. This is a very spontaneous
 project, which is a result of having too much free time and being fascinated with FastAPI. Plants are the main topic of

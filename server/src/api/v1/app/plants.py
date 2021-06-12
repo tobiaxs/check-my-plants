@@ -44,8 +44,8 @@ async def plant_create_form(
 
 
 @router.post("/plant/create", status_code=201, response_class=HTMLResponse)
-async def plant_create_form(
-    form: PlantCreateForm = Depends()
+async def plant_create(
+    form: PlantCreateForm = Depends(),
 ) -> Union[HTMLResponse, RedirectResponse]:
     """Creates a plant instance based on form data."""
     context = form.context.copy()

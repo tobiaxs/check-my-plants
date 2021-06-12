@@ -35,7 +35,7 @@ class PasswordsMatchValidator(GenericValidator):
         """Checks if passwords match."""
         if (
             not data["password"].get_secret_value()
-                == data["password_confirm"].get_secret_value()
+            == data["password_confirm"].get_secret_value()
         ):
             self.errors.append("Passwords didn't match")
 
@@ -53,7 +53,5 @@ class PasswordCorrectValidator(GenericValidator):
         user = await User.get_or_none(email=data["email"])
         if not user:
             return
-        if not HashingService.verify_password(
-            data["password"], user.hashed_password
-        ):
+        if not HashingService.verify_password(data["password"], user.hashed_password):
             self.errors.append("Wrong email or password")
