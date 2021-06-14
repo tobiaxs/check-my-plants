@@ -16,6 +16,8 @@ class EmailLengthValidator(GenericValidator):
 class UserExistsValidator(GenericValidator):
     async def validate(self, data: dict) -> None:
         """Checks if user already exists."""
+        if len(data["email"]) > 127:
+            return
         if await User.get_or_none(email=data["email"]):
             self.errors.append("User with that email already exists")
 

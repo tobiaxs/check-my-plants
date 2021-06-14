@@ -2,11 +2,7 @@ from fastapi import Depends
 from fastapi.params import Form
 
 from src.api.forms.generic import ModelCreateForm
-from src.api.forms.validators.plants import (
-    ConditionsValidator,
-    CreatorValidator,
-    NameLengthValidator,
-)
+from src.api.forms.validators.plants import ConditionsValidator, NameLengthValidator
 from src.api.middleware.context import context_middleware
 from src.database.models import Plant
 
@@ -38,5 +34,5 @@ class PlantCreateForm(ModelCreateForm):
             "creator": context.get("user"),
             "is_accepted": False,
         }
-        self.validators = [NameLengthValidator, CreatorValidator, ConditionsValidator]
+        self.validators = [NameLengthValidator, ConditionsValidator]
         self.context = context

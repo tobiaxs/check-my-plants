@@ -1,0 +1,215 @@
+import pytest
+from httpx import AsyncClient
+from pydantic import SecretStr
+
+from src.database.models import Plant, User
+from src.database.models.enums import Conditions
+from src.services.hashing import HashingService
+from tests.conftest import TEST_USER_EMAIL
+
+PLANT_PAYLOAD = {
+    "name": "Some Plant",
+    "description": "Some Description about Some Plant",
+    "temperature": Conditions.low,
+    "humidity": Conditions.high,
+}
+
+USER_PAYLOAD = {
+    "email": "some@user.com",
+    "password": "some-password",
+    "password_confirm": "some-password",
+}
+
+pytestmark = [pytest.mark.asyncio]
+
+
+async def test_register_route(client: AsyncClient):
+    """Checks route with user register form."""
+    response = await client.get("/register")
+    register_unique_text = "Already have an account?"
+
+    assert response.status_code == 200
+    assert register_unique_text in str(response.content)
+
+
+async def test_register_route_with_user(cookie_client: AsyncClient):
+    """Checks if request gets redirected as user is already logged in.
+
+    Plant is additionally created to make dashboard not empty.
+    """
+    # TODO: is_accepted has to be true
+    await Plant.create(
+        **PLANT_PAYLOAD,
+        creator=await User.get(email=TEST_USER_EMAIL),
+        is_accepted=False
+    )
+
+    response = await cookie_client.get("/register")
+    content = str(response.content)
+    register_unique_text = "Already have an account?"
+    dashboard_unique_text = "Check this plant"
+
+    assert response.status_code == 200
+    assert register_unique_text not in content
+    assert dashboard_unique_text in content
+
+
+async def test_register_form(client: AsyncClient):
+    """Checks registering user using form with correct payload."""
+    response = await client.post("/register", data=USER_PAYLOAD)
+    register_message = "You can now login into our app"
+
+    assert response.status_code == 201
+    assert register_message in str(response.content)
+    assert await User.get_or_none(email=USER_PAYLOAD["email"])
+
+
+async def test_register_form_too_short_errors(client: AsyncClient):
+    """Checks registering user using form with wrong payload."""
+    payload = {
+        "email": "short",
+        "password": "short",
+        "password_confirm": "notevenmatching",
+    }
+    response = await client.post("/register", data=payload)
+    content = str(response.content)
+
+    email_error = "Email address is too short"
+    password_error = "Password is too short"
+    password_confirm_error = "Passwords didn't match".replace("'", "&#39;")
+
+    assert response.status_code == 422
+    assert email_error in content
+    assert password_error in content
+    assert password_confirm_error in content
+    assert not await User.get_or_none(email=USER_PAYLOAD["email"])
+
+
+async def test_register_form_too_long_errors(client: AsyncClient):
+    """Checks registering user using form with wrong payload."""
+    long_string = "very-very-long" * 10
+    payload = {
+        "email": long_string,
+        "password": long_string,
+        "password_confirm": long_string,
+    }
+    response = await client.post("/register", data=payload)
+    content = str(response.content)
+
+    email_error = "Email address is too long"
+    password_error = "Password is too long"
+
+    assert response.status_code == 422
+    assert email_error in content
+    assert password_error in content
+    assert await User.all().count() == 0
+
+
+async def test_register_form_existing_user(client: AsyncClient):
+    """Checks registering user using form with already existing user."""
+    await User.create(**USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"])
+    response = await client.post("/register", data=USER_PAYLOAD)
+    content = str(response.content)
+
+    user_error = "User with that email already exists"
+
+    assert response.status_code == 422
+    assert user_error in content
+    assert await User.all().count() == 1
+
+
+async def test_login_route(client: AsyncClient):
+    """Checks route with user login form."""
+    response = await client.get("/login")
+    login_unique_text = "Don't have an account?"
+
+    assert response.status_code == 200
+    assert login_unique_text in response.content.decode()
+
+
+async def test_login_route_with_user(cookie_client: AsyncClient):
+    """Checks if request gets redirected as user is already logged in.
+
+    Plant is additionally created to make dashboard not empty.
+    """
+    # TODO: is_accepted has to be true
+    await Plant.create(
+        **PLANT_PAYLOAD,
+        creator=await User.get(email=TEST_USER_EMAIL),
+        is_accepted=False
+    )
+
+    response = await cookie_client.get("/login")
+    content = response.content.decode()
+    login_unique_text = "Don't have an account?"
+    dashboard_unique_text = "Check this plant"
+
+    assert response.status_code == 200
+    assert login_unique_text not in content
+    assert dashboard_unique_text in content
+
+
+async def test_login_form(client: AsyncClient):
+    """Checks logging user in using form with correct payload.
+
+    Plant is additionally created to make dashboard not empty.
+    """
+    instance_payload = {
+        "email": USER_PAYLOAD["email"],
+        "hashed_password": HashingService.get_hashed_password(
+            SecretStr(USER_PAYLOAD["password"])
+        ),
+    }
+    user = await User.create(**instance_payload)
+    # TODO: is_accepted has to be true
+    await Plant.create(**PLANT_PAYLOAD, creator=user, is_accepted=False)
+
+    response = await client.post("/login", data=USER_PAYLOAD)
+    content = response.content.decode()
+    login_unique_text = "Don't have an account?"
+    dashboard_unique_text = "Check this plant"
+
+    assert response.status_code == 200
+    assert login_unique_text not in content
+    assert dashboard_unique_text in content
+
+
+async def test_login_form_not_existing_user(client: AsyncClient):
+    """Checks logging user in using form with not existing user."""
+    response = await client.post("/login", data=USER_PAYLOAD)
+    content = response.content.decode()
+
+    user_error = "User with that email does not exist"
+
+    assert response.status_code == 422
+    assert user_error in content
+
+
+async def test_login_form_wrong_password(client: AsyncClient):
+    """Checks logging user in using form with not existing user."""
+    instance_payload = {
+        "email": USER_PAYLOAD["email"],
+        "hashed_password": HashingService.get_hashed_password(
+            SecretStr("different-password")
+        ),
+    }
+    await User.create(**instance_payload)
+    response = await client.post("/login", data=USER_PAYLOAD)
+    content = response.content.decode()
+
+    user_error = "Wrong email or password"
+
+    assert response.status_code == 422
+    assert user_error in content
+
+
+async def test_logout(cookie_client: AsyncClient):
+    """Checks user logout view."""
+    response = await cookie_client.get("/logout")
+    content = response.content.decode()
+
+    logout_message = "You have been logged out successfully"
+
+    assert response.status_code == 200
+    assert logout_message in content
+    assert response.cookies == {}

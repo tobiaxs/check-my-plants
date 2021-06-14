@@ -83,6 +83,15 @@ async def test_create_plant_no_user(client: AsyncClient):
     assert await Plant.all().count() == 0
 
 
+async def test_create_plant_wrong_token(auth_client: AsyncClient):
+    """Tests plant creation with wrong token header."""
+    auth_client.headers["Authorization"] = "Bearer very very wrong token"
+    response = await auth_client.post("/api/plants", data=json.dumps(PLANT_PAYLOAD))
+
+    assert response.status_code == 401
+    assert await Plant.all().count() == 0
+
+
 async def test_plants_list(client: AsyncClient):
     """Tests retrieving list of plants."""
     user = await User.create(

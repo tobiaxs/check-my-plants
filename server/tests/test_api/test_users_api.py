@@ -84,3 +84,47 @@ async def test_login_not_existing_user(client: AsyncClient):
 
     assert response.status_code == 401
     assert data["detail"] == "User does not exist"
+
+
+async def test_refresh(client: AsyncClient):
+    """Checks jwt refresh."""
+    payload = {
+        "email": "dustin.poirier@gmail.com",
+        "hashed_password": "diamond",
+    }
+    instance = await User.create(**payload)
+    jwt = JwtTokenService.encode_jwt(instance.email)
+    response = await client.get(
+        "/api/users/refresh",
+        headers={"Authorization": f"Bearer {jwt.access_token}"},
+    )
+    data = response.json()
+
+    assert response.status_code == 200
+    decoded_token = JwtTokenService.decode_jwt(data.get("access_token"))
+    assert decoded_token.dict().get("email") == payload.get("email")
+
+
+async def test_refresh_wrong_token(client: AsyncClient):
+    """Checks jwt refresh using wrong jwt token."""
+    response = await client.get(
+        "/api/users/refresh",
+        headers={"Authorization": "Bearer some fake bearer token"},
+    )
+    data = response.json()
+
+    assert response.status_code == 401
+    assert data["detail"] == "Token is either wrong or expired"
+
+
+async def test_refresh_not_existing_using_user(client: AsyncClient):
+    """Checks jwt refresh using token with not existing user."""
+    jwt = JwtTokenService.encode_jwt("brock.lesnar@gmail.com")
+    response = await client.get(
+        "/api/users/refresh",
+        headers={"Authorization": f"Bearer {jwt.access_token}"},
+    )
+    data = response.json()
+
+    assert response.status_code == 401
+    assert data["detail"] == "User from token payload does not exist"

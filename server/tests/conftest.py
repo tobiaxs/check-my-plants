@@ -11,6 +11,8 @@ from src.main import create_application
 from src.services.jwt_token import JwtTokenService
 from src.settings import settings
 
+TEST_USER_EMAIL = "pytest@auth.com"
+
 
 @pytest.fixture
 async def client() -> Generator[AsyncClient]:
@@ -28,9 +30,16 @@ async def client() -> Generator[AsyncClient]:
 @pytest.fixture
 async def auth_client(client: AsyncClient) -> Generator[AsyncClient]:
     """Authenticated async client."""
-    user = await User.create(
-        email="pytest@auth.com", hashed_password="pytest-auth-user"
-    )
+    user = await User.create(email=TEST_USER_EMAIL, hashed_password="pytest-auth-user")
     token = JwtTokenService.encode_jwt(user.email)
     client.headers["Authorization"] = f"Bearer {token.access_token}"
+    yield client
+
+
+@pytest.fixture
+async def cookie_client(client: AsyncClient) -> Generator[AsyncClient]:
+    """Async client with cookie."""
+    user = await User.create(email=TEST_USER_EMAIL, hashed_password="pytest-auth-user")
+    token = JwtTokenService.encode_jwt(user.email)
+    client.cookies = {"access_token": f"Bearer {token.access_token}"}
     yield client
