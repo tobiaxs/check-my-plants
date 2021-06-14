@@ -58,7 +58,7 @@ async def user_login(
     await form.validate()
     if form.errors:
         context = {"request": request, "errors": form.errors}
-        return TemplateResponse("users/login.html", context)
+        return TemplateResponse("users/login.html", context, 422)
     token = JwtTokenService.encode_jwt(form.data["email"])
     response = RedirectResponse("/", 302)
     response.set_cookie("access_token", f"Bearer {token.access_token}")
@@ -66,8 +66,12 @@ async def user_login(
 
 
 @router.get("/logout", status_code=200, response_class=RedirectResponse)
-async def user_logout() -> RedirectResponse:
+async def user_logout(request: Request) -> RedirectResponse:
     """Clears the cookies and redirects to the dashboard."""
-    response = RedirectResponse("/")
+    context = {
+        "request": request,
+        "messages": ["You have been logged out successfully"],
+    }
+    response = TemplateResponse("users/login.html", context)
     response.delete_cookie("access_token")
     return response

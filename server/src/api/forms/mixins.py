@@ -11,7 +11,6 @@ class FormCreateMixin:
 
     def clean(self) -> None:
         """Optional method for editing data before running create."""
-        pass
 
     async def create(self) -> "model":
         """Creates and returns a model instance based on the data."""

@@ -58,6 +58,5 @@ jobs:
       - name: Run isort
         run: poetry run isort . --check-only
 
-      # TODO: Increase the coverage
       - name: Test with pytest
-        run: poetry run pytest . --cov="." --cov-fail-under=50
+        run: poetry run pytest . --cov="." --cov-fail-under=99

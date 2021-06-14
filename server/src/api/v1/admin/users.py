@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from src.api.middleware.authentication import token_refresh_middleware
 from src.database.crud.users import authenticate_user, create_user
 from src.schemas.jwt_token import JwtTokenEncoded
 from src.schemas.users import UserPayload
@@ -18,4 +19,12 @@ async def register(payload: UserPayload) -> JwtTokenEncoded:
 async def login(payload: UserPayload) -> JwtTokenEncoded:
     """Given user credentials, creates and returns a new access token."""
     token = await authenticate_user(payload)
+    return token
+
+
+@router.get("/refresh", response_model=JwtTokenEncoded)
+async def refresh(
+    token: JwtTokenEncoded = Depends(token_refresh_middleware),
+) -> JwtTokenEncoded:
+    """Checks if the token is valid and refreshes it."""
     return token
