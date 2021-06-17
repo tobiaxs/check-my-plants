@@ -35,7 +35,6 @@ async def plant_details(
     return TemplateResponse("plants/details.html", context)
 
 
-# TODO: Change to /plants
 @router.get("/plant/create", status_code=200, response_class=HTMLResponse)
 async def plant_create_form(
     context: dict = Depends(context_middleware),
@@ -46,7 +45,6 @@ async def plant_create_form(
     return TemplateResponse("plants/create.html", context)
 
 
-# TODO: Change to /plants
 @router.post("/plant/create", status_code=201, response_class=HTMLResponse)
 async def plant_create(
     form: PlantCreateForm = Depends(),
