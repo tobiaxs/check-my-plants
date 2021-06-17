@@ -6,7 +6,7 @@
 
     {% include "components/error-handler.html" %}
 
-    <form action="/plant/create" method="POST">
+    <form action="/plant/create" method="POST" enctype="multipart/form-data">
         <div class="form-outline mb-4">
             <input type="text" name="name" id="form4Example1" class="form-control" required/>
             <label class="form-label" for="form4Example1">Name</label>
@@ -16,6 +16,9 @@
             <textarea class="form-control" name="description" id="form4Example3" rows="4" required></textarea>
             <label class="form-label" for="form4Example3">Description</label>
         </div>
+
+        <label class="form-label" for="customFile">Image</label>
+        <input type="file" name="image" class="form-control mb-4" id="customFile" accept="image/png, image/jpeg"/>
 
         <div>
             <p class="mb-1">Temperature</p>

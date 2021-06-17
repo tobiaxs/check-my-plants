@@ -3,9 +3,10 @@ import uuid
 import pytest
 from httpx import AsyncClient
 
-from src.database.models import Plant, User
+from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
 from tests.conftest import TEST_USER_EMAIL
+from tests.test_api.test_plants_api import TEST_FILE, create_test_plant_instances
 
 PLANT_PAYLOAD = {
     "name": "Some Plant",
@@ -29,11 +30,14 @@ pytestmark = [pytest.mark.asyncio]
 
 async def test_plants_dashboard(cookie_client: AsyncClient):
     """Tests plants dashboard route."""
+    user = await User.get(email=TEST_USER_EMAIL)
     for plant_payload in PLANTS_PAYLOAD:
         # TODO: is_accepted has to be true
+        image = await Image.create(name="some_name.jpg", path="some/path")
         await Plant.create(
             **plant_payload,
-            creator=await User.get(email=TEST_USER_EMAIL),
+            creator=user,
+            image=image,
             is_accepted=False,
         )
 
@@ -49,12 +53,7 @@ async def test_plants_dashboard(cookie_client: AsyncClient):
 
 async def test_plant_details(cookie_client: AsyncClient):
     """Tests plant details route."""
-    # TODO: is_accepted has to be true
-    plant = await Plant.create(
-        **PLANT_PAYLOAD,
-        creator=await User.get(email=TEST_USER_EMAIL),
-        is_accepted=False,
-    )
+    _, _, plant = await create_test_plant_instances()
 
     response = await cookie_client.get(f"/plants/{plant.uuid}")
     content = response.content.decode()
@@ -96,7 +95,9 @@ async def test_plant_create_form_route_no_user(client: AsyncClient):
 
 async def test_plant_create(cookie_client: AsyncClient):
     """Test plant create form with correct payload."""
-    response = await cookie_client.post("/plant/create", data=PLANT_PAYLOAD)
+    response = await cookie_client.post(
+        "/plant/create", data=PLANT_PAYLOAD, files=TEST_FILE
+    )
     content = response.content.decode()
 
     detail_view_text = f"Created by {TEST_USER_EMAIL}"
@@ -111,7 +112,7 @@ async def test_plant_create(cookie_client: AsyncClient):
 
 async def test_plant_create_no_user(client: AsyncClient):
     """Test plant create form with no user cookie."""
-    response = await client.post("/plant/create", data=PLANT_PAYLOAD)
+    response = await client.post("/plant/create", data=PLANT_PAYLOAD, files=TEST_FILE)
     content = response.content.decode()
 
     error_text = "You are not permitted to visit this page"
@@ -125,7 +126,9 @@ async def test_plant_create_no_user(client: AsyncClient):
 async def test_plant_create_wrong_cookie(cookie_client: AsyncClient):
     """Test plant create form with wrong user cookie."""
     cookie_client.cookies = {"access_token": "Bearer very very wrong"}
-    response = await cookie_client.post("/plant/create", data=PLANT_PAYLOAD)
+    response = await cookie_client.post(
+        "/plant/create", data=PLANT_PAYLOAD, files=TEST_FILE
+    )
     content = response.content.decode()
 
     error_text = "You are not permitted to visit this page"
@@ -144,7 +147,7 @@ async def test_plant_create_wrong_payload(cookie_client: AsyncClient):
         "temperature": "wrong",
         "humidity": "wrongtoo",
     }
-    response = await cookie_client.post("/plant/create", data=payload)
+    response = await cookie_client.post("/plant/create", data=payload, files=TEST_FILE)
     content = response.content.decode()
 
     name_error = "Name is too long"

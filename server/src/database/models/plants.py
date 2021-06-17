@@ -17,5 +17,14 @@ class Plant(GenericModel):
     creator = fields.ForeignKeyField(
         "models.User", related_name="plants", on_delete=fields.CASCADE
     )
+    image = fields.OneToOneField(
+        "models.Image", related_name="plant", on_delete=fields.CASCADE
+    )
 
     # TODO: Category, Image, Rating, Difficulty
+
+    async def delete(self, *args, **kwargs) -> None:
+        """Deletes the connected image instance."""
+        await self.fetch_related("image")
+        await self.image.delete()
+        await super().delete(*args, **kwargs)

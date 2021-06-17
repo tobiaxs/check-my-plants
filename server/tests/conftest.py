@@ -1,4 +1,5 @@
 from collections import Generator
+from unittest.mock import mock_open, patch
 
 import nest_asyncio
 import pytest
@@ -12,6 +13,14 @@ from src.services.jwt_token import JwtTokenService
 from src.settings import settings
 
 TEST_USER_EMAIL = "pytest@auth.com"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_file_mock() -> Generator[None]:
+    """Mocks the create file function logic to prevent adding files in tests."""
+    with patch("src.services.images.open", mock_open()):
+        with patch("src.services.images.shutil.copyfileobj"):
+            yield
 
 
 @pytest.fixture

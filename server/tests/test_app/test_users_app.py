@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 from pydantic import SecretStr
 
-from src.database.models import Plant, User
+from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
 from src.services.hashing import HashingService
 from tests.conftest import TEST_USER_EMAIL
@@ -41,6 +41,7 @@ async def test_register_route_with_user(cookie_client: AsyncClient):
     await Plant.create(
         **PLANT_PAYLOAD,
         creator=await User.get(email=TEST_USER_EMAIL),
+        image=await Image.create(name="some_name.jpg", path="some/path"),
         is_accepted=False
     )
 
@@ -136,6 +137,7 @@ async def test_login_route_with_user(cookie_client: AsyncClient):
     await Plant.create(
         **PLANT_PAYLOAD,
         creator=await User.get(email=TEST_USER_EMAIL),
+        image=await Image.create(name="some_name.jpg", path="some/path"),
         is_accepted=False
     )
 
@@ -162,7 +164,12 @@ async def test_login_form(client: AsyncClient):
     }
     user = await User.create(**instance_payload)
     # TODO: is_accepted has to be true
-    await Plant.create(**PLANT_PAYLOAD, creator=user, is_accepted=False)
+    await Plant.create(
+        **PLANT_PAYLOAD,
+        creator=user,
+        image=await Image.create(name="some_name.jpg", path="some/path"),
+        is_accepted=False
+    )
 
     response = await client.post("/login", data=USER_PAYLOAD)
     content = response.content.decode()

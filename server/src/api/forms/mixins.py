@@ -9,11 +9,11 @@ class FormCreateMixin:
     model: GenericModel
     data: Dict[str, Any]
 
-    def clean(self) -> None:
+    async def clean(self) -> None:
         """Optional method for editing data before running create."""
 
     async def create(self) -> "model":
         """Creates and returns a model instance based on the data."""
-        self.clean()
+        await self.clean()
         instance = await self.model.create(**self.data)
         return instance
