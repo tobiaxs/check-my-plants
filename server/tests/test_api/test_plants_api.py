@@ -1,12 +1,13 @@
-import json
 import uuid
 from datetime import datetime
 from typing import Optional
+from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 from httpx import AsyncClient
 
-from src.database.models import Plant, User
+from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
 
 pytestmark = [pytest.mark.asyncio]
@@ -14,9 +15,27 @@ pytestmark = [pytest.mark.asyncio]
 PLANT_PAYLOAD = {
     "name": "Some Plant",
     "description": "Some Description about Some Plant",
-    "temperature": Conditions.low,
-    "humidity": Conditions.high,
+    "temperature": Conditions.low.value,
+    "humidity": Conditions.high.value,
 }
+TEST_FILE = {"image": ("some_image.jpg", bytes(), "image/jpeg")}
+
+
+async def create_test_plant_instances(
+    user: Optional[User] = None, image: Optional[Image] = None
+) -> tuple[User, Image, Plant]:
+    """Creates a user, image and plant instances for testing purposes."""
+    # TODO: Replace with factories?
+    if not user:
+        user, _ = await User.get_or_create(
+            email="some@creator.com", hashed_password="created-password"
+        )
+    if not image:
+        image = await Image.create(name="some_name.jpg", path="some/path")
+    plant = await Plant.create(
+        **PLANT_PAYLOAD, creator=user, image=image, is_accepted=True
+    )
+    return user, image, plant
 
 
 async def check_all_fields(
@@ -49,7 +68,9 @@ async def check_creator(
 
 async def test_create_plant(auth_client: AsyncClient):
     """Tests plant creation using correct payload."""
-    response = await auth_client.post("/api/plants", data=json.dumps(PLANT_PAYLOAD))
+    response = await auth_client.post(
+        "/api/plants", data=PLANT_PAYLOAD, files=TEST_FILE
+    )
     data = response.json()
 
     assert response.status_code == 201
@@ -65,7 +86,7 @@ async def test_create_plant_wrong_enum(auth_client: AsyncClient):
     payload["temperature"] = "wrong temperature"
     payload["humidity"] = "wrong humidity"
 
-    response = await auth_client.post("/api/plants", data=json.dumps(payload))
+    response = await auth_client.post("/api/plants", data=payload, files=TEST_FILE)
     data = response.json()
 
     assert response.status_code == 422
@@ -77,7 +98,7 @@ async def test_create_plant_wrong_enum(auth_client: AsyncClient):
 
 async def test_create_plant_no_user(client: AsyncClient):
     """Tests plant creation with no user token in the payload."""
-    response = await client.post("/api/plants", data=json.dumps(PLANT_PAYLOAD))
+    response = await client.post("/api/plants", data=PLANT_PAYLOAD, files=TEST_FILE)
 
     assert response.status_code == 403
     assert await Plant.all().count() == 0
@@ -86,7 +107,9 @@ async def test_create_plant_no_user(client: AsyncClient):
 async def test_create_plant_wrong_token(auth_client: AsyncClient):
     """Tests plant creation with wrong token header."""
     auth_client.headers["Authorization"] = "Bearer very very wrong token"
-    response = await auth_client.post("/api/plants", data=json.dumps(PLANT_PAYLOAD))
+    response = await auth_client.post(
+        "/api/plants", data=PLANT_PAYLOAD, files=TEST_FILE
+    )
 
     assert response.status_code == 401
     assert await Plant.all().count() == 0
@@ -94,13 +117,8 @@ async def test_create_plant_wrong_token(auth_client: AsyncClient):
 
 async def test_plants_list(client: AsyncClient):
     """Tests retrieving list of plants."""
-    user = await User.create(
-        email="some@creator.com", hashed_password="created-password"
-    )
-    plants = [
-        await Plant.create(**PLANT_PAYLOAD, creator=user, is_accepted=True)
-        for _ in range(3)
-    ]
+    plants = [(await create_test_plant_instances())[2] for _ in range(3)]
+    user = await User.get(email="some@creator.com")
     response = await client.get("/api/plants")
     data = response.json()
 
@@ -112,10 +130,7 @@ async def test_plants_list(client: AsyncClient):
 
 async def test_plant_retrieve(client: AsyncClient):
     """Tests retrieving specific plant."""
-    user = await User.create(
-        email="some@creator.com", hashed_password="created-password"
-    )
-    plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
+    user, _, plant = await create_test_plant_instances()
     response = await client.get(f"/api/plants/{plant.uuid}")
     data = response.json()
 
@@ -129,14 +144,19 @@ async def test_plant_retrieve_wrong_pk(client: AsyncClient):
     assert response.status_code == 404
 
 
-async def test_plant_delete(auth_client: AsyncClient):
+@mock.patch("src.database.models.images.shutil.which", return_value=True)
+@mock.patch("src.database.models.images.shutil.rmtree")
+async def test_plant_delete(
+    mock_which: Mock, mock_rmtree: Mock, auth_client: AsyncClient
+):
     """Tests deleting plant."""
     user = await User.get(email="pytest@auth.com")
-    plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
+    _, _, plant = await create_test_plant_instances(user=user)
     response = await auth_client.delete(f"/api/plants/{plant.uuid}")
 
     assert response.status_code == 200
     assert await Plant.all().count() == 0
+    assert await Image.all().count() == 0
 
 
 async def test_plant_delete_wrong_pk(auth_client: AsyncClient):
@@ -147,8 +167,7 @@ async def test_plant_delete_wrong_pk(auth_client: AsyncClient):
 
 async def test_plant_delete_wrong_user(auth_client: AsyncClient):
     """Tests deleting plant by user that is not creator."""
-    user = await User.create(email="plant@creator.com", hashed_password="plant-creator")
-    plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
+    _, _, plant = await create_test_plant_instances()
     response = await auth_client.delete(f"/api/plants/{plant.uuid}")
 
     assert response.status_code == 403
@@ -159,8 +178,7 @@ async def test_plant_delete_wrong_user(auth_client: AsyncClient):
 async def test_plant_delete_wrong_superuser(auth_client: AsyncClient):
     """Tests deleting plant by user that is not creator, but it's a superuser."""
     await User.filter(email="pytest@auth.com").update(is_superuser=True)
-    user = await User.create(email="plant@creator.com", hashed_password="plant-creator")
-    plant = await Plant.create(**PLANT_PAYLOAD, creator=user)
+    _, _, plant = await create_test_plant_instances()
     response = await auth_client.delete(f"/api/plants/{plant.uuid}")
 
     assert response.status_code == 200

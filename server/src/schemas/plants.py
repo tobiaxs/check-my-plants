@@ -3,10 +3,11 @@ from tortoise.contrib.pydantic import pydantic_queryset_creator
 
 from src.database.models import Plant
 from src.database.models.enums import Conditions
-from src.schemas.generic import BaseOrmModel
+from src.schemas.generic import BaseOrmModel, as_form
 from src.schemas.users import UserModelUuid
 
 
+@as_form
 class PlantCreate(BaseModel):
     """Payload needed for plant creation."""
 

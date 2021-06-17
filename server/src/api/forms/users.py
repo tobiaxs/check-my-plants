@@ -39,7 +39,7 @@ class UserCreateForm(ModelCreateForm):
             PasswordsMatchValidator,
         ]
 
-    def clean(self):
+    async def clean(self):
         """Makes data ready to create an user instance."""
         email = self.data["email"]
         password = self.data["password"]

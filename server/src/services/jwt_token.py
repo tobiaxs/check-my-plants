@@ -18,7 +18,7 @@ class JwtTokenService:
     @staticmethod
     def encode_jwt(email: str) -> JwtTokenEncoded:
         """Returns valid jwt token based on given email."""
-        payload = {"email": email, "expires": time.time() + 600}
+        payload = {"email": email, "expires": time.time() + 1800}
         token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
         return JwtTokenEncoded.parse_obj({"access_token": token})
 

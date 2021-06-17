@@ -1,14 +1,20 @@
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 
 from src.database.models import Plant, User
 from src.schemas.plants import PlantCreate, PlantModel, PlantQuerySet
+from src.services.images import ImageService
 
 
-async def create_plant(payload: PlantCreate, user: User) -> PlantModel:
+async def create_plant(
+    payload: PlantCreate, image_file: UploadFile, user: User
+) -> PlantModel:
     """Creates a new plant instance."""
-    plant = await Plant.create(**payload.dict(), creator=user, is_accepted=False)
+    image = await ImageService.create_image(image_file, "plant_images")
+    plant = await Plant.create(
+        **payload.dict(), creator=user, image=image, is_accepted=False
+    )
     plant_model = PlantModel.from_orm(plant)
     return plant_model
 

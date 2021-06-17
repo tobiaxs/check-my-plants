@@ -1,10 +1,11 @@
-from fastapi import Depends
-from fastapi.params import Form
+from fastapi import Depends, UploadFile
+from fastapi.params import File, Form
 
 from src.api.forms.generic import ModelCreateForm
 from src.api.forms.validators.plants import ConditionsValidator, NameLengthValidator
 from src.api.middleware.context import context_middleware
 from src.database.models import Plant
+from src.services.images import ImageService
 
 
 class PlantCreateForm(ModelCreateForm):
@@ -21,6 +22,7 @@ class PlantCreateForm(ModelCreateForm):
         context: dict = Depends(context_middleware),
         name: str = Form(...),
         description: str = Form(...),
+        image: UploadFile = File(...),
         temperature: str = Form(...),
         humidity: str = Form(...),
     ):
@@ -32,7 +34,13 @@ class PlantCreateForm(ModelCreateForm):
             "temperature": temperature,
             "humidity": humidity,
             "creator": context.get("user"),
+            "image": image,
             "is_accepted": False,
         }
         self.validators = [NameLengthValidator, ConditionsValidator]
         self.context = context
+
+    async def clean(self) -> None:
+        """Adds an image object to the payload."""
+        image = await ImageService.create_image(self.data["image"], "plant_images")
+        self.data["image"] = image

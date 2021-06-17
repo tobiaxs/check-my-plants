@@ -15,7 +15,9 @@ router = APIRouter(tags=["Plants"], include_in_schema=False)
 @router.get("/", status_code=200, response_class=HTMLResponse)
 async def plants_dashboard(context: dict = Depends(context_middleware)) -> HTMLResponse:
     """Displays a list of all plants."""
-    plants = await Plant.filter(is_accepted=False)  # TODO: Change to True
+    plants = await Plant.filter(is_accepted=False).prefetch_related(
+        "image"
+    )  # TODO: Change to True
     context["plants"] = plants
     return TemplateResponse("plants/dashboard.html", context)
 
@@ -28,11 +30,12 @@ async def plant_details(
     plant = await Plant.get_or_none(pk=pk)
     if not plant:
         return TemplateResponse("shared/404-page.html", context, 404)
-    await plant.fetch_related("creator")
+    await plant.fetch_related("creator", "image")
     context["plant"] = plant
     return TemplateResponse("plants/details.html", context)
 
 
+# TODO: Change to /plants
 @router.get("/plant/create", status_code=200, response_class=HTMLResponse)
 async def plant_create_form(
     context: dict = Depends(context_middleware),
@@ -43,6 +46,7 @@ async def plant_create_form(
     return TemplateResponse("plants/create.html", context)
 
 
+# TODO: Change to /plants
 @router.post("/plant/create", status_code=201, response_class=HTMLResponse)
 async def plant_create(
     form: PlantCreateForm = Depends(),

@@ -1,6 +1,7 @@
 /.idea
 /venv
 /server/htmlcov
+/server/static/plant_images
 
 .env
 .coverage

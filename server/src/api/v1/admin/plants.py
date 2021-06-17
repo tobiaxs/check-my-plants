@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 
 from src.api.middleware.authentication import user_middleware
 from src.database.crud.plants import (
@@ -17,10 +17,12 @@ router = APIRouter(prefix="/api/plants", tags=["Plants Api"])
 
 @router.post("/", status_code=201, response_model=PlantModel)
 async def plant_create(
-    payload: PlantCreate, user: User = Depends(user_middleware)
+    payload: PlantCreate = Depends(PlantCreate.as_form),
+    image: UploadFile = File(...),
+    user: User = Depends(user_middleware),
 ) -> PlantModel:
     """Creates a new plant instance."""
-    plant = await create_plant(payload, user)
+    plant = await create_plant(payload, image, user)
     return plant
 
 
