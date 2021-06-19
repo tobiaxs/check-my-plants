@@ -1,11 +1,13 @@
+import uuid
+
 import pytest
 from httpx import AsyncClient
 from pydantic import SecretStr
+from tests.conftest import TEST_USER_EMAIL
 
 from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
 from src.services.hashing import HashingService
-from tests.conftest import TEST_USER_EMAIL
 
 PLANT_PAYLOAD = {
     "name": "Some Plant",
@@ -220,3 +222,56 @@ async def test_logout(cookie_client: AsyncClient):
     assert response.status_code == 200
     assert logout_message in content
     assert response.cookies == {}
+
+
+async def test_user_profile(cookie_client: AsyncClient):
+    """Checks user profile view."""
+    user = await User.get(email=TEST_USER_EMAIL)
+    response = await cookie_client.get(f"/profile/{user.pk}")
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert user.email in content
+
+
+async def test_user_profile_no_user(client: AsyncClient):
+    """Checks user profile view with wrong user uuid."""
+    response = await client.get(f"/profile/{uuid.uuid4()}")
+    content = response.content.decode()
+
+    assert response.status_code == 404
+    assert "The page you tried to access does not exist" in content
+
+
+async def test_user_delete(cookie_client: AsyncClient):
+    """Checks user delete view."""
+    user = await User.get(email=TEST_USER_EMAIL)
+    response = await cookie_client.post(f"/profile/{user.pk}")
+    content = response.content.decode()
+
+    delete_message = "User has been deleted successfully."
+
+    assert response.status_code == 200
+    assert delete_message in content
+    assert not await User.get_or_none(email=TEST_USER_EMAIL)
+
+
+async def test_user_delete_no_user(client: AsyncClient):
+    """Checks user delete view with no user."""
+    response = await client.post(f"/profile/{uuid.uuid4()}")
+    content = response.content.decode()
+
+    assert response.status_code == 404
+    assert "The page you tried to access does not exist" in content
+
+
+async def test_user_delete_wrong_user(cookie_client: AsyncClient):
+    """Checks user delete view with wrong user."""
+    profile_user = await User.create(**USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"])
+    response = await cookie_client.post(f"/profile/{profile_user.pk}")
+    content = response.content.decode()
+
+    error_text = "You are not permitted to visit this page"
+
+    assert response.status_code == 403
+    assert error_text in content

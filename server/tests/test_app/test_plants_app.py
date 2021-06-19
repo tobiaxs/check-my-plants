@@ -2,11 +2,11 @@ import uuid
 
 import pytest
 from httpx import AsyncClient
+from tests.conftest import TEST_USER_EMAIL
+from tests.test_api.test_plants_api import TEST_FILE, create_test_plant_instances
 
 from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
-from tests.conftest import TEST_USER_EMAIL
-from tests.test_api.test_plants_api import TEST_FILE, create_test_plant_instances
 
 PLANT_PAYLOAD = {
     "name": "Some Plant",
@@ -100,7 +100,7 @@ async def test_plant_create(cookie_client: AsyncClient):
     )
     content = response.content.decode()
 
-    detail_view_text = f"Created by {TEST_USER_EMAIL}"
+    detail_view_text = TEST_USER_EMAIL
     plant = await Plant.get_or_none(name=PLANT_PAYLOAD["name"])
 
     assert response.status_code == 200

@@ -1,0 +1,120 @@
+{% extends "shared/base.html" %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <section class="mx-auto mb-4" style="max-width: 23rem;">
+                <div class="card testimonial-card">
+                    <div class="avatar mx-auto white mt-3">
+                        <img src="/static/favicon.ico" class="rounded-circle img-fluid">
+                    </div>
+                    <div class="card-body text-center">
+                        <h4 class="card-title font-weight-bold">{{ profile_user.email }}</h4>
+                        {% if user == profile_user %}
+                            <hr>
+                            {# TODO: Add edit #}
+                            {# <button type="button" class="btn btn-primary">Edit</button> #}
+                            <button type="button" class="btn btn-danger"
+                                    data-mdb-toggle="modal" data-mdb-target="#exampleModal"
+                            >
+                                Delete
+                            </button>
+                            <div
+                                    class="modal fade"
+                                    id="exampleModal"
+                                    tabindex="-1"
+                                    aria-labelledby="exampleModalLabel"
+                                    aria-hidden="true"
+                            >
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Deleting account</h5>
+                                            <button
+                                                    type="button"
+                                                    class="btn-close"
+                                                    data-mdb-dismiss="modal"
+                                                    aria-label="Close"
+                                            ></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete your account?<br>
+                                            There will be no coming back!
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" data-mdb-dismiss="modal">
+                                                No, go back
+                                            </button>
+                                            <form action="/profile/{{ profile_user.pk }}" method="post">
+                                                <button class="btn btn-danger" type="submit">
+                                                    Yes, I'm sure
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <hr>
+                        <p>Joined {{ days_since_join }} days ago</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="row d-flex justify-content-around">
+            {# TODO: Add new fields #}
+            {#            <div class="col-xl-3 col-sm-6 col-12 mb-4">#}
+            {#                <div class="card">#}
+            {#                    <div class="card-body">#}
+            {#                        <div class="d-flex justify-content-between px-md-1">#}
+            {#                            <div class="align-self-center">#}
+            {#                                <i class="fas fa-leaf text-success fa-3x"></i>#}
+            {#                            </div>#}
+            {#                            <div class="text-end">#}
+            {#                                <h3>{{ plants|length }}</h3>#}
+            {#                                <p class="mb-0">Added Plants</p>#}
+            {#                            </div>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#            </div>#}
+            {#            <div class="col-xl-3 col-sm-6 col-12 mb-4">#}
+            {#                <div class="card">#}
+            {#                    <div class="card-body">#}
+            {#                        <div class="d-flex justify-content-between px-md-1">#}
+            {#                            <div class="align-self-center">#}
+            {#                                <i class="fas fa-star-half-alt text-warning fa-3x"></i>#}
+            {#                            </div>#}
+            {#                            <div class="text-end">#}
+            {#                                <h3>{{ avg_rating }} / 10</h3>#}
+            {#                                <p class="mb-0">Average Rating</p>#}
+            {#                            </div>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#            </div>#}
+            {#            <div class="col-xl-3 col-sm-6 col-12 mb-4">#}
+            {#                <div class="card">#}
+            {#                    <div class="card-body">#}
+            {#                        <div class="d-flex justify-content-between px-md-1">#}
+            {#                            <div class="align-self-center">#}
+            {#                                <i class="fas fa-chart-line text-info fa-3x"></i>#}
+            {#                            </div>#}
+            {#                            <div class="text-end">#}
+            {#                                <h3>{{ avg_difficulty }} / 10</h3>#}
+            {#                                <p class="mb-0">Average Difficulty</p>#}
+            {#                            </div>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#            </div>#}
+        </div>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for plant in plants %}
+                <div class="col">
+                    {% include "plants/card.html" %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
