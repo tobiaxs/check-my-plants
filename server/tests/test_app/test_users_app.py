@@ -3,11 +3,11 @@ import uuid
 import pytest
 from httpx import AsyncClient
 from pydantic import SecretStr
-from tests.conftest import TEST_USER_EMAIL
 
 from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
 from src.services.hashing import HashingService
+from tests.conftest import TEST_USER_EMAIL
 
 PLANT_PAYLOAD = {
     "name": "Some Plant",
@@ -44,7 +44,7 @@ async def test_register_route_with_user(cookie_client: AsyncClient):
         **PLANT_PAYLOAD,
         creator=await User.get(email=TEST_USER_EMAIL),
         image=await Image.create(name="some_name.jpg", path="some/path"),
-        is_accepted=False
+        is_accepted=False,
     )
 
     response = await cookie_client.get("/register")
@@ -140,7 +140,7 @@ async def test_login_route_with_user(cookie_client: AsyncClient):
         **PLANT_PAYLOAD,
         creator=await User.get(email=TEST_USER_EMAIL),
         image=await Image.create(name="some_name.jpg", path="some/path"),
-        is_accepted=False
+        is_accepted=False,
     )
 
     response = await cookie_client.get("/login")
@@ -170,7 +170,7 @@ async def test_login_form(client: AsyncClient):
         **PLANT_PAYLOAD,
         creator=user,
         image=await Image.create(name="some_name.jpg", path="some/path"),
-        is_accepted=False
+        is_accepted=False,
     )
 
     response = await client.post("/login", data=USER_PAYLOAD)
@@ -267,7 +267,9 @@ async def test_user_delete_no_user(client: AsyncClient):
 
 async def test_user_delete_wrong_user(cookie_client: AsyncClient):
     """Checks user delete view with wrong user."""
-    profile_user = await User.create(**USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"])
+    profile_user = await User.create(
+        **USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"]
+    )
     response = await cookie_client.post(f"/profile/{profile_user.pk}")
     content = response.content.decode()
 

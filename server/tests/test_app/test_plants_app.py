@@ -2,11 +2,11 @@ import uuid
 
 import pytest
 from httpx import AsyncClient
-from tests.conftest import TEST_USER_EMAIL
-from tests.test_api.test_plants_api import TEST_FILE, create_test_plant_instances
 
 from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
+from tests.conftest import TEST_USER_EMAIL
+from tests.test_api.test_plants_api import TEST_FILE, create_test_plant_instances
 
 PLANT_PAYLOAD = {
     "name": "Some Plant",
