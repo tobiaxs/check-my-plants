@@ -28,7 +28,8 @@
                     </p>
                     <p class="card-text text-end">
                         <small class="text-muted">
-                            Created by {{ plant.creator.email }} at {{ plant.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                            Created by <a href="/profile/{{ plant.creator.pk }}">{{ plant.creator.email }}</a>
+                            at {{ plant.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
                         </small>
                     </p>
                 </div>

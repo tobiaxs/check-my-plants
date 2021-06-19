@@ -100,7 +100,7 @@ async def test_plant_create(cookie_client: AsyncClient):
     )
     content = response.content.decode()
 
-    detail_view_text = f"Created by {TEST_USER_EMAIL}"
+    detail_view_text = TEST_USER_EMAIL
     plant = await Plant.get_or_none(name=PLANT_PAYLOAD["name"])
 
     assert response.status_code == 200

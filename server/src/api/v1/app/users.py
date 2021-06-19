@@ -1,4 +1,6 @@
+from datetime import datetime, timezone
 from typing import Union
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
@@ -7,6 +9,7 @@ from starlette.responses import HTMLResponse, RedirectResponse
 from src.api.forms.users import UserCreateForm, UserLoginForm
 from src.api.middleware.context import context_middleware
 from src.api.middleware.response import TemplateResponse
+from src.database.models import Plant, User
 from src.services.jwt_token import JwtTokenService
 
 router = APIRouter(tags=["Users"], include_in_schema=False)
@@ -75,3 +78,38 @@ async def user_logout(request: Request) -> RedirectResponse:
     response = TemplateResponse("users/login.html", context)
     response.delete_cookie("access_token")
     return response
+
+
+@router.get("/profile/{pk}", status_code=200, response_class=HTMLResponse)
+async def user_profile(
+    pk: UUID, context: dict = Depends(context_middleware)
+) -> HTMLResponse:
+    """Prepares the context and displays a user profile page."""
+    profile_user = await User.get_or_none(pk=pk)
+    if not profile_user:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    plants = await Plant.filter(creator=profile_user).prefetch_related("image")
+    context["days_since_join"] = (
+        datetime.now(timezone.utc) - profile_user.created_at
+    ).days
+    context["profile_user"] = profile_user
+    context["plants"] = plants
+    return TemplateResponse("users/profile.html", context)
+
+
+@router.post("/profile/{pk}", status_code=200, response_class=HTMLResponse)
+async def user_delete(
+    pk: UUID, context: dict = Depends(context_middleware)
+) -> HTMLResponse:
+    """Deletes the user if it matches the one in the context
+    and redirects to the login page.
+    """
+    profile_user = await User.get_or_none(pk=pk)
+    if not profile_user:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    user = context.get("user")
+    if not user or not user == profile_user:
+        return TemplateResponse("shared/403-page.html", context, 403)
+    await profile_user.delete()
+    context["messages"] = ["User has been deleted successfully."]
+    return TemplateResponse("users/login.html", context, 200)

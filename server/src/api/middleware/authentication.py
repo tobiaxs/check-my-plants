@@ -51,5 +51,5 @@ async def cookie_user_middleware(
     decoded_token = JwtTokenService.decode_jwt(token.credentials)
     if not decoded_token:
         return None
-    user = await JwtTokenService.get_user_from_token(decoded_token)
+    user = await JwtTokenService.get_user_from_token(decoded_token, False)
     return user

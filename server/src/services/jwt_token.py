@@ -48,12 +48,16 @@ class JwtTokenService:
         return refreshed_token
 
     @staticmethod
-    async def get_user_from_token(decoded_token: JwtTokenDecoded) -> User:
-        """Checks token validity and raises an exception if it's not valid.
+    async def get_user_from_token(
+        decoded_token: JwtTokenDecoded, required: bool = True
+    ) -> User:
+        """Checks token validity and raises an exception
+        if it's not valid and required is set to True.
+
         If payload matches all requirements, User instance is getting returned.
         """
         user = await User.get_or_none(email=decoded_token.email)
-        if not user:
+        if required and not user:
             raise HTTPException(
                 status_code=401, detail="User from token payload does not exist"
             )
