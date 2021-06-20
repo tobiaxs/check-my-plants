@@ -50,10 +50,18 @@ class UserDontExistValidator(GenericValidator):
 
 
 class PasswordCorrectValidator(GenericValidator):
+    password_field = "password"
+
     async def validate(self, data: dict) -> None:
         """Checks if password is correct comparing to one stored in the db."""
         user = await User.get_or_none(email=data["email"])
         if not user:
             return
-        if not HashingService.verify_password(data["password"], user.hashed_password):
-            self.errors.append("Wrong email or password")
+        if not HashingService.verify_password(
+            data[self.password_field], user.hashed_password
+        ):
+            self.errors.append("Password you have entered is not correct")
+
+
+class OldPasswordCorrectValidator(PasswordCorrectValidator):
+    password_field = "old_password"

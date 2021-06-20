@@ -2,10 +2,12 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
+from httpx import AsyncClient
 from starlette.testclient import TestClient
 from tortoise import Tortoise
 
-from src.database.config import generate_schema
+from src.database.config import create_superuser, generate_schema
+from src.database.models import User
 from src.main import app
 from src.settings import settings
 
@@ -40,3 +42,10 @@ async def test_generate_schema(
     )
     mock_generate_schemas.assert_called_once()
     mock_close_connections.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_superuser(client: AsyncClient):
+    """Tests creating superuser."""
+    await create_superuser()
+    assert await User.all().count() == 1

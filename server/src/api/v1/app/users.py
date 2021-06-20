@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, RedirectResponse
 
-from src.api.forms.users import UserCreateForm, UserLoginForm
+from src.api.forms.users import PasswordChangeForm, UserCreateForm, UserLoginForm
 from src.api.middleware.context import context_middleware
 from src.api.middleware.response import TemplateResponse
 from src.database.models import Plant, User
@@ -113,3 +113,40 @@ async def user_delete(
     await profile_user.delete()
     context["messages"] = ["User has been deleted successfully."]
     return TemplateResponse("users/login.html", context, 200)
+
+
+@router.get("/change_password/{pk}", status_code=200, response_class=HTMLResponse)
+async def change_password_form(
+    pk: UUID, context: dict = Depends(context_middleware)
+) -> HTMLResponse:
+    """Displays the password change form if correct user is logged in."""
+    profile_user = await User.get_or_none(pk=pk)
+    if not profile_user:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    user = context.get("user")
+    if not user or not user == profile_user:
+        return TemplateResponse("shared/403-page.html", context, 403)
+    return TemplateResponse("users/change_password.html", context, 200)
+
+
+@router.post("/change_password/{pk}", status_code=200, response_class=HTMLResponse)
+async def change_password(
+    pk: UUID, form: PasswordChangeForm = Depends()
+) -> HTMLResponse:
+    """Changes user password using password change form
+    and redirects back to the form.
+    """
+    context = form.context
+    profile_user = await User.get_or_none(pk=pk)
+    if not profile_user:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    user = context.get("user")
+    if not user or not user == profile_user:
+        return TemplateResponse("shared/403-page.html", context, 403)
+    await form.validate()
+    if form.errors:
+        context["errors"] = form.errors
+        return TemplateResponse("users/change_password.html", context, 422)
+    await form.update(profile_user)
+    context["messages"] = ["Password has been changed successfully!"]
+    return TemplateResponse("users/change_password.html", context, 200)

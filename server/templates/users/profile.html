@@ -12,8 +12,9 @@
                         <h4 class="card-title font-weight-bold">{{ profile_user.email }}</h4>
                         {% if user == profile_user %}
                             <hr>
-                            {# TODO: Add edit #}
-                            {# <button type="button" class="btn btn-primary">Edit</button> #}
+                            <a href="/change_password/{{ profile_user.pk }}" role="button" class="btn btn-primary">
+                                Change Password
+                            </a>
                             <button type="button" class="btn btn-danger"
                                     data-mdb-toggle="modal" data-mdb-target="#exampleModal"
                             >
@@ -63,21 +64,21 @@
         </div>
         <div class="row d-flex justify-content-around">
             {# TODO: Add new fields #}
-            {#            <div class="col-xl-3 col-sm-6 col-12 mb-4">#}
-            {#                <div class="card">#}
-            {#                    <div class="card-body">#}
-            {#                        <div class="d-flex justify-content-between px-md-1">#}
-            {#                            <div class="align-self-center">#}
-            {#                                <i class="fas fa-leaf text-success fa-3x"></i>#}
-            {#                            </div>#}
-            {#                            <div class="text-end">#}
-            {#                                <h3>{{ plants|length }}</h3>#}
-            {#                                <p class="mb-0">Added Plants</p>#}
-            {#                            </div>#}
-            {#                        </div>#}
-            {#                    </div>#}
-            {#                </div>#}
-            {#            </div>#}
+            <div class="col-xl-3 col-sm-6 col-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between px-md-1">
+                            <div class="align-self-center">
+                                <i class="fas fa-leaf text-success fa-3x"></i>
+                            </div>
+                            <div class="text-end">
+                                <h3>{{ plants|length }}</h3>
+                                <p class="mb-0">Added Plants</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {#            <div class="col-xl-3 col-sm-6 col-12 mb-4">#}
             {#                <div class="card">#}
             {#                    <div class="card-body">#}

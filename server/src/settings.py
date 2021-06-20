@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = os.getenv("ENVIRONMENT")
     DATABASE_URL: str = os.getenv("DATABASE_URL")
+    SUPERUSER_EMAIL: str = os.getenv("SUPERUSER_EMAIL")
+    SUPERUSER_PASSWORD: str = os.getenv("SUPERUSER_PASSWORD")
 
     APP_MODELS: list[str] = [
         "src.database.models",
