@@ -59,3 +59,20 @@ async def plant_create(
         return TemplateResponse("plants/create.html", context, 422)
     plant = await form.create()
     return RedirectResponse(f"/plants/{plant.uuid}", 302)
+
+
+@router.post("/plant/delete/{pk}", status_code=200, response_class=HTMLResponse)
+async def plant_delete(
+    pk: UUID, context: dict = Depends(context_middleware)
+) -> HTMLResponse:
+    """Deletes the plant if it exists and given user is its creator."""
+    plant = await Plant.get_or_none(pk=pk)
+    if not plant:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    user = context.get("user")
+    await plant.fetch_related("creator")
+    if not user or not user == plant.creator:
+        return TemplateResponse("shared/403-page.html", context, 403)
+    await plant.delete()
+    context["messages"] = ["Plant has been deleted successfully"]
+    return TemplateResponse("plants/create.html", context, 200)

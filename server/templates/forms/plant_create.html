@@ -4,6 +4,7 @@
     <h1 class="fw-bold mb-0">Create a new plant</h1>
     <i class="fas fa-leaf fa-3x my-4"></i>
 
+    {% include "components/message-handler.html" %}
     {% include "components/error-handler.html" %}
 
     <form action="/plant/create" method="POST" enctype="multipart/form-data">
