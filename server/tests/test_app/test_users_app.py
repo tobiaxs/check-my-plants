@@ -22,6 +22,12 @@ USER_PAYLOAD = {
     "password_confirm": "some-password",
 }
 
+PASSWORD_PAYLOAD = {
+    "old_password": "pytest-auth-user",
+    "password": "newpassword",
+    "password_confirm": "newpassword",
+}
+
 pytestmark = [pytest.mark.asyncio]
 
 
@@ -206,7 +212,7 @@ async def test_login_form_wrong_password(client: AsyncClient):
     response = await client.post("/login", data=USER_PAYLOAD)
     content = response.content.decode()
 
-    user_error = "Wrong email or password"
+    user_error = "Password you have entered is not correct"
 
     assert response.status_code == 422
     assert user_error in content
@@ -277,3 +283,101 @@ async def test_user_delete_wrong_user(cookie_client: AsyncClient):
 
     assert response.status_code == 403
     assert error_text in content
+
+
+async def test_change_password_form(cookie_client: AsyncClient):
+    """Checks displaying user password form."""
+    user = await User.get(email=TEST_USER_EMAIL)
+    response = await cookie_client.get(f"/change_password/{user.pk}")
+    content = response.content.decode()
+
+    form_message = "Change your password"
+
+    assert response.status_code == 200
+    assert form_message in content
+
+
+async def test_change_password_form_no_user(client: AsyncClient):
+    """Checks displaying user password form for no user."""
+    response = await client.get(f"/change_password/{uuid.uuid4()}")
+    content = response.content.decode()
+
+    assert response.status_code == 404
+    assert "The page you tried to access does not exist" in content
+
+
+async def test_change_password_form_wrong_user(cookie_client: AsyncClient):
+    """Checks displaying user password form for wrong user."""
+    profile_user = await User.create(
+        **USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"]
+    )
+    response = await cookie_client.get(f"/change_password/{profile_user.pk}")
+    content = response.content.decode()
+
+    error_text = "You are not permitted to visit this page"
+
+    assert response.status_code == 403
+    assert error_text in content
+
+
+async def test_change_password(cookie_client: AsyncClient):
+    """Checks changing password for correct user."""
+    user = await User.get(email=TEST_USER_EMAIL)
+    response = await cookie_client.post(
+        f"/change_password/{user.pk}", data=PASSWORD_PAYLOAD
+    )
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert "Password has been changed successfully!" in content
+    await user.refresh_from_db()
+    assert HashingService.verify_password(
+        SecretStr(PASSWORD_PAYLOAD["password"]), user.hashed_password
+    )
+
+
+async def test_change_password_no_user(client: AsyncClient):
+    """Checks changing user password for no user."""
+    response = await client.post(
+        f"/change_password/{uuid.uuid4()}", data=PASSWORD_PAYLOAD
+    )
+    content = response.content.decode()
+
+    assert response.status_code == 404
+    assert "The page you tried to access does not exist" in content
+
+
+async def test_change_password_wrong_user(cookie_client: AsyncClient):
+    """Checks changing user password for wrong user."""
+    profile_user = await User.create(
+        **USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"]
+    )
+    response = await cookie_client.post(
+        f"/change_password/{profile_user.pk}", data=PASSWORD_PAYLOAD
+    )
+    content = response.content.decode()
+
+    error_text = "You are not permitted to visit this page"
+
+    assert response.status_code == 403
+    assert error_text in content
+
+
+async def test_change_password_errors(cookie_client: AsyncClient):
+    """Checks changing password for correct user with wrong payload."""
+    user = await User.get(email=TEST_USER_EMAIL)
+    payload = {
+        "old_password": "absolutely-wrong",
+        "password": "shorty",
+        "password_confirm": "dont-match",
+    }
+    response = await cookie_client.post(f"/change_password/{user.pk}", data=payload)
+    content = response.content.decode()
+
+    assert response.status_code == 422
+    assert "Password you have entered is not correct" in content
+    assert "Passwords didn't match".replace("'", "&#39;") in content
+    await user.refresh_from_db()
+    assert not HashingService.verify_password(
+        SecretStr(PASSWORD_PAYLOAD["password"]), user.hashed_password
+    )

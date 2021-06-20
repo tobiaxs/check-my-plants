@@ -1,7 +1,10 @@
 from fastapi import FastAPI
+from pydantic import SecretStr
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
+from src.database.models import User
+from src.services.hashing import HashingService
 from src.settings import settings
 
 """Tortoise settings."""
@@ -24,6 +27,17 @@ def init_database(app: FastAPI) -> None:
         modules={"models": settings.APP_MODELS},
         generate_schemas=False,
         add_exception_handlers=True,
+    )
+
+
+async def create_superuser() -> None:
+    """Creates a starting superuser."""
+    await User.get_or_create(
+        email=settings.SUPERUSER_EMAIL,
+        hashed_password=HashingService.get_hashed_password(
+            SecretStr(settings.SUPERUSER_PASSWORD)
+        ),
+        is_superuser=True,
     )
 
 
