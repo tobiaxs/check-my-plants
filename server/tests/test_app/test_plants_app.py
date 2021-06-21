@@ -7,6 +7,7 @@ from src.database.models import Image, Plant, User
 from src.database.models.enums import Conditions
 from tests.conftest import TEST_USER_EMAIL
 from tests.test_api.test_plants_api import TEST_FILE, create_test_plant_instances
+from tests.test_app.test_users_app import USER_PAYLOAD
 
 PLANT_PAYLOAD = {
     "name": "Some Plant",
@@ -160,3 +161,38 @@ async def test_plant_create_wrong_payload(cookie_client: AsyncClient):
     assert temperature_error in content
     assert humidity_error in content
     assert plant is None
+
+
+async def test_plant_delete(cookie_client: AsyncClient):
+    """Tests deleting plant."""
+    user = await User.get(email=TEST_USER_EMAIL)
+    image = await Image.create(name="some_name.jpg", path="some/path")
+    plant = await Plant.create(**PLANT_PAYLOAD, creator=user, image=image)
+
+    response = await cookie_client.post(f"/plant/delete/{plant.pk}")
+    content = response.content.decode()
+
+    assert response.status_code == 200
+    assert "Plant has been deleted successfully" in content
+
+
+async def test_plant_delete_no_plant(cookie_client: AsyncClient):
+    """Tests deleting not existing plant."""
+    response = await cookie_client.post(f"/plant/delete/{uuid.uuid4()}")
+    content = response.content.decode()
+
+    assert response.status_code == 404
+    assert "The page you tried to access does not exist" in content
+
+
+async def test_plant_delete_wrong_user(cookie_client: AsyncClient):
+    """Tests deleting plant user that is not an creator."""
+    user = await User.create(**USER_PAYLOAD, hashed_password=USER_PAYLOAD["password"])
+    image = await Image.create(name="some_name.jpg", path="some/path")
+    plant = await Plant.create(**PLANT_PAYLOAD, creator=user, image=image)
+
+    response = await cookie_client.post(f"/plant/delete/{plant.pk}")
+    content = response.content.decode()
+
+    assert response.status_code == 403
+    assert "You are not permitted to visit this page" in content

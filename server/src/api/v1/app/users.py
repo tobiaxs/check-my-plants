@@ -102,7 +102,7 @@ async def user_delete(
     pk: UUID, context: dict = Depends(context_middleware)
 ) -> HTMLResponse:
     """Deletes the user if it matches the one in the context
-    and redirects to the login page.
+    and redirects to the dashboard page.
     """
     profile_user = await User.get_or_none(pk=pk)
     if not profile_user:
@@ -111,6 +111,7 @@ async def user_delete(
     if not user or not user == profile_user:
         return TemplateResponse("shared/403-page.html", context, 403)
     await profile_user.delete()
+    context.pop("user")
     context["messages"] = ["User has been deleted successfully."]
     return TemplateResponse("users/login.html", context, 200)
 
