@@ -51,3 +51,23 @@ And you should be good to go.
 
 In `server` folder there is also a `Makefile` file, which makes it easier to run some command. Feel free to check it
 out.
+
+### TODOs:
+
+There are some things that I didn't really take care about, because I just wanted backend side to be finished. And these
+are:
+
+* parametrizing tests
+* mypy
+* mdbootstrap color pallete
+* aerich migrations
+* view dependency, which would deal with 403 / 404 by default
+
+### Conclusions
+
+What I've learned while making this project (beside many interesting aspects and features of FastAPI) is that jinja
+templates are very easy to setup, and they deliver the results quickly, but imo it's much cleaner and more convenient to
+stay with regular REST Api + React / Angular setup. It just doesn't feel right to have the app structured like this,
+where one half of the api is serving some HTML files, and the other half connected with some frontend. Yet, that was the
+original idea which I really wanted to try, and still that was an interesting experience. Also, I found out that im
+easily getting distracted by some other technologies.

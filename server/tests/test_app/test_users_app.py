@@ -381,3 +381,6 @@ async def test_change_password_errors(cookie_client: AsyncClient):
     assert not HashingService.verify_password(
         SecretStr(PASSWORD_PAYLOAD["password"]), user.hashed_password
     )
+
+
+# TODO: It's a crime that those tests are not parametrized

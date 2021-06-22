@@ -1,5 +1,9 @@
 {% extends "shared/base.html" %}
 
 {% block content %}
-    {% include "forms/plant_create.html" %}
+    {% set form_header="Create a new plant" %}
+    {% set form_url="/plant/create" %}
+    {% set form_button="Create" %}
+
+    {% include "forms/plant.html" %}
 {% endblock %}

@@ -1,0 +1,9 @@
+{% extends "shared/base.html" %}
+
+{% block content %}
+    {% set form_header="Edit your plant" %}
+    {% set form_url="/plant/edit/" + plant.pk|string %}
+    {% set form_button="Edit" %}
+
+    {% include "forms/plant.html" %}
+{% endblock %}

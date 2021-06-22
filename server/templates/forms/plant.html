@@ -1,0 +1,78 @@
+{% extends "components/card.html" %}
+{% block card_content %}
+    <h1 class="fw-bold mb-0">{{ form_header }}</h1>
+    <i class="fas fa-leaf fa-3x my-4"></i>
+
+    {% include "components/message-handler.html" %}
+    {% include "components/error-handler.html" %}
+
+    {# Set default value to prevent from failing #}
+    {% set plant=plant or {"temperature": {"value": "average"}, "humidity": {"value": "average"}} %}
+
+    <form action="{{ form_url }}" method="POST" enctype="multipart/form-data">
+        <div class="form-outline mb-4">
+            <input type="text" name="name" id="form4Example1" class="form-control" value="{{ plant.name }}"
+                   required/>
+            <label class="form-label" for="form4Example1">Name</label>
+        </div>
+
+        <div class="form-outline mb-4">
+            <textarea class="form-control" name="description" id="form4Example3" rows="4"
+                      required>{{ plant.description }}</textarea>
+            <label class="form-label" for="form4Example3">Description</label>
+        </div>
+
+        <label class="form-label" for="customFile">
+            Image
+            {% if plant.pk %}
+                <i class="fas fa-question-circle text-info" data-mdb-toggle="tooltip" style="cursor: pointer;"
+                   title="Leave blank if you don't want to change the uploaded image">
+                </i>
+            {% endif %}
+        </label>
+        <input type="file" name="image" class="form-control mb-4" id="customFile" accept="image/png, image/jpeg"/>
+
+        <div>
+            <p class="mb-1">Temperature</p>
+            <div class="btn-group mb-4">
+                <input type="radio" class="btn-check" value="low" name="temperature" id="temperature_low"
+                       autocomplete="off"/>
+                <label class="btn btn-success" for="temperature_low">Low</label>
+
+                <input type="radio" class="btn-check" value="average" name="temperature" id="temperature_average"
+                       autocomplete="off"/>
+                <label class="btn btn-success" for="temperature_average">Average</label>
+
+                <input type="radio" class="btn-check" value="high" name="temperature" id="temperature_high"
+                       autocomplete="off"/>
+                <label class="btn btn-success" for="temperature_high">High</label>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <p class="mb-1">Humidity</p>
+            <div class="btn-group mb-4">
+                <input type="radio" class="btn-check" value="low" name="humidity" id="humidity_low" autocomplete="off"/>
+                <label class="btn btn-success" for="humidity_low">Low</label>
+
+                <input type="radio" class="btn-check" value="average" name="humidity" id="humidity_average"
+                       autocomplete="off"/>
+                <label class="btn btn-success" for="humidity_average">Average</label>
+
+                <input type="radio" class="btn-check" value="high" name="humidity" id="humidity_high"
+                       autocomplete="off"/>
+                <label class="btn btn-success" for="humidity_high">High</label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mb-0">{{ form_button }}</button>
+    </form>
+
+    <script>
+        // Kill me for doing this...
+        const temperatureRadioId = "temperature_" + "{{ plant.temperature.value }}";
+        const humidityRadioId = "humidity_" + "{{ plant.humidity.value }}";
+        document.getElementById(temperatureRadioId).checked = true;
+        document.getElementById(humidityRadioId).checked = true;
+    </script>
+{% endblock %}

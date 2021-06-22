@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from starlette.responses import HTMLResponse, RedirectResponse
 
-from src.api.forms.plants import PlantCreateForm
+from src.api.forms.plants import PlantCreateForm, PlantEditForm
 from src.api.middleware.context import context_middleware
 from src.api.middleware.response import TemplateResponse
 from src.database.models import Plant
@@ -76,3 +76,47 @@ async def plant_delete(
     await plant.delete()
     context["messages"] = ["Plant has been deleted successfully"]
     return TemplateResponse("plants/create.html", context, 200)
+
+
+@router.get("/plant/edit/{pk}", status_code=200, response_class=HTMLResponse)
+async def plant_edit_form(
+    pk: UUID, context: dict = Depends(context_middleware)
+) -> HTMLResponse:
+    """Displays the plant edit form for given plant if correct user is present."""
+    # TODO: Some `ViewHelper` class should deal with those initial `if` statements
+    plant = await Plant.get_or_none(pk=pk)
+    if not plant:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    user = context.get("user")
+    await plant.fetch_related("creator")
+    if not user or not user == plant.creator:
+        return TemplateResponse("shared/403-page.html", context, 403)
+    await plant.fetch_related("creator")
+    await plant.fetch_related("image")
+    context["plant"] = plant
+    return TemplateResponse("plants/edit.html", context, 200)
+
+
+@router.post("/plant/edit/{pk}", status_code=200, response_class=HTMLResponse)
+async def plant_edit(
+    pk: UUID,
+    form: PlantEditForm = Depends(),
+) -> HTMLResponse:
+    """Edits given plant with given form data."""
+    # TODO: Again, `ViewHelper` dependency...
+    context = form.context
+    plant = await Plant.get_or_none(pk=pk)
+    if not plant:
+        return TemplateResponse("shared/404-page.html", context, 404)
+    user = context.get("user")
+    await plant.fetch_related("creator")
+    if not user or not user == plant.creator:
+        return TemplateResponse("shared/403-page.html", context, 403)
+    await form.validate()
+    context["plant"] = plant
+    if form.errors:
+        context["errors"] = form.errors
+        return TemplateResponse("plants/edit.html", context, 422)
+    await form.update(plant)
+    context["messages"] = ["Plant has been edited successfully!"]
+    return TemplateResponse("plants/edit.html", context, 200)
