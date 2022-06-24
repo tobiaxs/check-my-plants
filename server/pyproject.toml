@@ -7,7 +7,7 @@ authors = ["tobiwankenobii <tobiv1337@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 fastapi = "^0.66.0"
-uvicorn = "^0.14.0"
+uvicorn = "^0.18.0"
 pydantic = {extras = ["email"], version = "^1.8.2"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-jose = {extras = ["cryptography"], version = "^3.2.0"}
